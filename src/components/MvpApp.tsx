@@ -92,6 +92,11 @@ export default function MvpApp() {
         fetch('/api/time-logs'),
       ]);
 
+      // Check if responses are ok
+      if (!pRes.ok || !tRes.ok || !tlRes.ok) {
+        throw new Error('API error: ' + [pRes.status, tRes.status, tlRes.status].join(', '));
+      }
+
       const pJson = await pRes.json();
       const tJson = await tRes.json();
       const tlJson = await tlRes.json();
@@ -113,6 +118,7 @@ export default function MvpApp() {
       });
     } catch (err) {
       console.error('Refresh error:', err);
+      // Fail silently, use cached data
     }
   }
 
@@ -132,9 +138,17 @@ export default function MvpApp() {
         setShowProjectForm(false);
         await refreshData();
       } else {
-        const err = await res.json();
-        alert(err.error || 'Failed to create project');
+        const text = await res.text();
+        try {
+          const err = JSON.parse(text);
+          alert(err.error || 'Failed to create project');
+        } catch {
+          alert('Failed to create project: ' + res.statusText);
+        }
       }
+    } catch (err) {
+      console.error('Create project error:', err);
+      alert('Error creating project');
     } finally {
       setLoading(false);
     }
@@ -170,9 +184,17 @@ export default function MvpApp() {
         setNewTaskType('Working');
         await refreshData();
       } else {
-        const err = await res.json();
-        alert(err.error || 'Failed to create task');
+        const text = await res.text();
+        try {
+          const err = JSON.parse(text);
+          alert(err.error || 'Failed to create task');
+        } catch {
+          alert('Failed to create task: ' + res.statusText);
+        }
       }
+    } catch (err) {
+      console.error('Create task error:', err);
+      alert('Error creating task');
     } finally {
       setLoading(false);
     }
@@ -234,11 +256,14 @@ export default function MvpApp() {
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !loading && fetchLogin(email)}
               />
+              <p className="mt-2 text-xs text-gray-500">
+                Tip: Use any email to test (e.g., test@example.com)
+              </p>
             </div>
 
             <Button
-              onClick={() => fetchLogin(email)}
-              disabled={loading || !email.trim()}
+              onClick={() => fetchLogin(email || 'test@example.com')}
+              disabled={loading}
               className="w-full"
             >
               {loading ? 'Signing in...' : 'Sign In'}
@@ -262,6 +287,9 @@ export default function MvpApp() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link href="/tasks">
+              <Button variant="outline">View All Tasks</Button>
+            </Link>
             <Link href="/reports">
               <Button variant="outline">Reports</Button>
             </Link>
@@ -419,85 +447,47 @@ export default function MvpApp() {
             </div>
           )}
 
-          {/* Tasks List */}
+          {/* Projects List */}
           <div className="rounded-lg bg-white shadow">
             <div className="border-b border-gray-200 px-6 py-4">
-              <h2 className="text-xl font-bold">Tasks</h2>
+              <h2 className="text-xl font-bold">Projects</h2>
             </div>
 
-            {tasks.length === 0 ? (
+            {projects.length === 0 ? (
               <div className="px-6 py-8 text-center text-gray-500">
-                No tasks yet. Create one above to get started!
+                No projects yet. Create one above to get started!
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
-                {tasks.map((task) => {
-                  const isActive = activeTaskId === task.id;
-                  const project = projects.find((p) => p.id === task.project_id);
-
-                  return (
-                    <div key={task.id} className="px-6 py-4 hover:bg-gray-50">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{task.title}</h3>
-
-                          {task.description && (
-                            <p className="mt-1 text-sm text-gray-600">{task.description}</p>
-                          )}
-
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <span className="inline-block rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                              {task.type}
-                            </span>
-                            <span className="inline-block rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
-                              {task.status}
-                            </span>
-                            {project && (
-                              <span className="inline-block rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                                {project.name}
-                              </span>
-                            )}
-                          </div>
-
-                          {(task.requester || task.pic) && (
-                            <div className="mt-2 text-xs text-gray-500">
-                              {task.requester && <span>Requester: {task.requester}</span>}
-                              {task.requester && task.pic && <span> • </span>}
-                              {task.pic && <span>PIC: {task.pic}</span>}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex flex-shrink-0 gap-2">
-                          <Button
-                            variant={isActive ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => startStop(task.id, 'start')}
-                            disabled={loading || (!!activeTaskId && !isActive)}
-                          >
-                            Start
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => startStop(task.id, 'stop')}
-                            disabled={loading || !isActive}
-                          >
-                            Stop
-                          </Button>
-                        </div>
-                      </div>
-
-                      {isActive && (
-                        <div className="mt-2 inline-block rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                          ⏱️ Running...
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
+                {projects.map((project) => (
+                  <div
+                    key={project.id}
+                    className="rounded-lg border border-gray-200 p-4 hover:shadow-md"
+                  >
+                    <h3 className="font-semibold text-gray-900">{project.name}</h3>
+                    <p className="mt-2 text-sm text-gray-600">
+                      {tasks.filter((t) => t.project_id === project.id).length} tasks
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-lg bg-white p-6 shadow">
+              <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{tasks.length}</p>
+            </div>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <p className="text-sm font-medium text-gray-600">Active Project</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{projects.length}</p>
+            </div>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <p className="text-sm font-medium text-gray-600">Running Task</p>
+              <p className="mt-2 text-3xl font-bold text-green-600">{activeTaskId ? '1' : '0'}</p>
+            </div>
           </div>
         </div>
       </div>
