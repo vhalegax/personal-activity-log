@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
 type User = { id: string; email: string };
 
 export default function MvpApp() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
-  const [projectName, setProjectName] = useState("");
-  const [taskTitle, setTaskTitle] = useState("");
+  const [projectName, setProjectName] = useState('');
+  const [taskTitle, setTaskTitle] = useState('');
 
   useEffect(() => {
-    const e = localStorage.getItem("mvp_email") || "";
+    const e = localStorage.getItem('mvp_email') || '';
     if (e) {
       setEmail(e);
       fetchLogin(e);
@@ -21,8 +21,8 @@ export default function MvpApp() {
   }, []);
 
   async function fetchLogin(e: string) {
-    const res = await fetch("/api/auth", {
-      method: "POST",
+    const res = await fetch('/api/auth', {
+      method: 'POST',
       body: JSON.stringify({ email: e }),
     });
 
@@ -30,17 +30,14 @@ export default function MvpApp() {
 
     setUser(data.user);
 
-    localStorage.setItem("mvp_email", e);
+    localStorage.setItem('mvp_email', e);
 
     refreshLists(e);
   }
 
   async function refreshLists(userEmail?: string) {
     const u = userEmail || email;
-    const [pRes, tRes] = await Promise.all([
-      fetch("/api/projects"),
-      fetch("/api/tasks"),
-    ]);
+    const [pRes, tRes] = await Promise.all([fetch('/api/projects'), fetch('/api/tasks')]);
     const pJson = await pRes.json();
     const tJson = await tRes.json();
     setProjects(pJson.projects || []);
@@ -49,27 +46,27 @@ export default function MvpApp() {
 
   async function createProject() {
     if (!projectName) return;
-    await fetch("/api/projects", {
-      method: "POST",
+    await fetch('/api/projects', {
+      method: 'POST',
       body: JSON.stringify({ name: projectName, user_email: email }),
     });
-    setProjectName("");
+    setProjectName('');
     refreshLists();
   }
 
   async function createTask() {
     if (!taskTitle) return;
-    await fetch("/api/tasks", {
-      method: "POST",
+    await fetch('/api/tasks', {
+      method: 'POST',
       body: JSON.stringify({ title: taskTitle, user_email: email }),
     });
-    setTaskTitle("");
+    setTaskTitle('');
     refreshLists();
   }
 
-  async function startStop(taskId: string, action: "start" | "stop") {
-    await fetch("/api/time-logs", {
-      method: "POST",
+  async function startStop(taskId: string, action: 'start' | 'stop') {
+    await fetch('/api/time-logs', {
+      method: 'POST',
       body: JSON.stringify({ action, task_id: taskId, user_email: email }),
     });
     // no need to refresh lists for MVP
@@ -83,8 +80,8 @@ export default function MvpApp() {
 
   if (!user)
     return (
-      <div className="p-6 max-w-md mx-auto">
-        <h2 className="text-2xl font-bold mb-4">Login — email only</h2>
+      <div className="mx-auto max-w-md p-6">
+        <h2 className="mb-4 text-2xl font-bold">Login — email only</h2>
         <input
           className="input"
           placeholder="you@domain"
@@ -104,11 +101,11 @@ export default function MvpApp() {
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Signed in as {user.email}</h3>
         <button
-          className="text-sm text-muted-foreground"
+          className="text-muted-foreground text-sm"
           onClick={() => {
-            localStorage.removeItem("mvp_email");
+            localStorage.removeItem('mvp_email');
             setUser(null);
-            setEmail("");
+            setEmail('');
           }}
         >
           Sign out
@@ -117,7 +114,7 @@ export default function MvpApp() {
 
       <section className="mb-6">
         <h4 className="font-medium">Projects</h4>
-        <div className="flex gap-2 mt-2">
+        <div className="mt-2 flex gap-2">
           <input
             className="input"
             placeholder="New project"
@@ -137,7 +134,7 @@ export default function MvpApp() {
 
       <section className="mb-6">
         <h4 className="font-medium">Tasks</h4>
-        <div className="flex gap-2 mt-2">
+        <div className="mt-2 flex gap-2">
           <input
             className="input"
             placeholder="New task title"
@@ -153,18 +150,15 @@ export default function MvpApp() {
             <li key={t.id} className="flex items-center justify-between">
               <div>
                 <div className="font-medium">{t.title}</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-muted-foreground text-sm">
                   {t.status} • {t.type}
                 </div>
               </div>
               <div className="flex gap-2">
-                <button
-                  className="btn"
-                  onClick={() => startStop(t.id, "start")}
-                >
+                <button className="btn" onClick={() => startStop(t.id, 'start')}>
                   Start
                 </button>
-                <button className="btn" onClick={() => startStop(t.id, "stop")}>
+                <button className="btn" onClick={() => startStop(t.id, 'stop')}>
                   Stop
                 </button>
               </div>
