@@ -2,6 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  getStoredData,
+  saveStoredData,
+  updateStoredValue,
+  clearStoredData,
+  type StorageData,
+} from '@/lib/storage';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
@@ -43,6 +50,13 @@ export default function MvpApp() {
     const e = localStorage.getItem('mvp_email') || '';
     if (e) {
       setEmail(e);
+      // Load cached data first
+      const cached = getStoredData();
+      if (cached.user) setUser(cached.user);
+      if (cached.projects) setProjects(cached.projects);
+      if (cached.tasks) setTasks(cached.tasks);
+      if (cached.activeTaskId) setActiveTaskId(cached.activeTaskId);
+
       fetchLogin(e);
     }
   }, []);
@@ -57,6 +71,10 @@ export default function MvpApp() {
       const data = await res.json();
       setUser(data.user);
       localStorage.setItem('mvp_email', e);
+
+      // Save to localStorage
+      saveStoredData({ user: data.user });
+
       await refreshData();
     } catch (err) {
       console.error('Login error:', err);
@@ -83,7 +101,16 @@ export default function MvpApp() {
 
       // Find active time log
       const active = (tlJson.timeLogs || []).find((l: any) => l.end_at == null);
-      setActiveTaskId(active ? active.task_id : null);
+      const activeId = active ? active.task_id : null;
+      setActiveTaskId(activeId);
+
+      // Save to localStorage
+      saveStoredData({
+        projects: pJson.projects || [],
+        tasks: tJson.tasks || [],
+        timeLogs: tlJson.timeLogs || [],
+        activeTaskId: activeId,
+      });
     } catch (err) {
       console.error('Refresh error:', err);
     }
@@ -181,9 +208,13 @@ export default function MvpApp() {
   }
 
   async function handleSignOut() {
+    clearStoredData();
     localStorage.removeItem('mvp_email');
     setUser(null);
     setEmail('');
+    setProjects([]);
+    setTasks([]);
+    setActiveTaskId(null);
   }
 
   if (!user) {
