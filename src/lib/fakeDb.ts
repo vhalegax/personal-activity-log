@@ -48,7 +48,9 @@ export const db = {
   timeLogs: [] as TimeLog[],
 
   findOrCreateUserByEmail(email: string) {
-    let u = this.users.find((x) => x.email.toLowerCase() === email.toLowerCase());
+    let u = this.users.find(
+      (x) => x.email.toLowerCase() === email.toLowerCase()
+    );
 
     if (!u) {
       u = { id: id("user"), email, created_at: new Date().toISOString() };
