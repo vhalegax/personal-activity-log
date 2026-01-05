@@ -1,0 +1,10 @@
+[core]
+	bare = false
+	repositoryformatversion = 0
+	filemode = true
+	ignorecase = true
+	precomposeunicode = true
+	logallrefupdates = true
+[branch "vk/b738-init"]
+	gk-last-accessed = 2025-12-31T21:58:48.116Z
+	gk-last-modified = 2025-12-31T21:58:48.116Z
