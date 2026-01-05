@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:ai": "prettier --write \"src/app/api/**/*.{ts,tsx,js,jsx}\" \"src/components/**/*.{ts,tsx,js,jsx}\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
