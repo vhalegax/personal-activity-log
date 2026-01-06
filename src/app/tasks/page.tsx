@@ -35,6 +35,7 @@ export default function TasksPage() {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [unauthorized, setUnauthorized] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -43,8 +44,8 @@ export default function TasksPage() {
   function loadData() {
     const email = localStorage.getItem('mvp_email');
     if (!email) {
-      // Redirect to home if not logged in
-      window.location.href = '/';
+      setUnauthorized(true);
+      setLoading(false);
       return;
     }
 
@@ -98,6 +99,20 @@ export default function TasksPage() {
       (task.description && task.description.toLowerCase().includes(query))
     );
   });
+
+  if (unauthorized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="rounded-lg bg-white p-8 text-center shadow">
+          <h1 className="mb-4 text-2xl font-bold">Please Log In First</h1>
+          <p className="mb-6 text-gray-600">You need to log in to view your tasks.</p>
+          <Link href="/">
+            <Button>Go Back to Login</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

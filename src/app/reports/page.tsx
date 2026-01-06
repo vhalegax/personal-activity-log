@@ -26,8 +26,14 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
+  const [unauthorized, setUnauthorized] = useState(false);
 
   useEffect(() => {
+    const email = localStorage.getItem('mvp_email');
+    if (!email) {
+      setUnauthorized(true);
+      return;
+    }
     fetchReport('today');
   }, []);
 
@@ -83,6 +89,20 @@ export default function ReportsPage() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (unauthorized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="rounded-lg bg-white p-8 text-center shadow">
+          <h1 className="mb-4 text-2xl font-bold">Please Log In First</h1>
+          <p className="mb-6 text-gray-600">You need to log in to view your reports.</p>
+          <Link href="/">
+            <Button>Go Back to Login</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

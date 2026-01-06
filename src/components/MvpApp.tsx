@@ -221,9 +221,17 @@ export default function MvpApp() {
         }
         await refreshData();
       } else {
-        const err = await res.json();
-        alert(err.error || `Failed to ${action} timer`);
+        const text = await res.text();
+        try {
+          const err = JSON.parse(text);
+          alert(err.error || `Failed to ${action} timer`);
+        } catch {
+          alert(`Failed to ${action} timer: ` + res.statusText);
+        }
       }
+    } catch (err) {
+      console.error('Start/Stop error:', err);
+      alert('Error with timer');
     } finally {
       setLoading(false);
     }
