@@ -1,11 +1,8 @@
-"use client";
+'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -14,12 +11,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/use-auth';
+import { signupSchema, type SignupSchema } from '@/schemas/auth-schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { signupSchema, type SignupSchema } from '@/schemas/auth-schema';
-import { useAuth } from '@/hooks/use-auth';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -53,7 +54,10 @@ export default function SignUpPage() {
       await mutateAsync(values);
       form.reset();
     } catch (err: any) {
-      form.setError('email', { type: 'manual', message: err?.message ?? 'Failed to create account' });
+      form.setError('email', {
+        type: 'manual',
+        message: err?.message ?? 'Failed to create account',
+      });
     }
   };
 
@@ -75,7 +79,9 @@ export default function SignUpPage() {
           {isSuccess && (
             <Alert className="mb-4 border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">Account created! Redirecting to login...</AlertDescription>
+              <AlertDescription className="text-green-800">
+                Account created! Redirecting to login...
+              </AlertDescription>
             </Alert>
           )}
 
@@ -130,7 +136,7 @@ export default function SignUpPage() {
             </form>
           </Form>
 
-          <div className="mt-4 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-primary hover:underline">
               Sign in

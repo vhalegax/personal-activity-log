@@ -3,7 +3,14 @@
 import { supabase } from '@/lib/supabase-client';
 import { Session, User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 interface AuthContextType {
   user: User | null;

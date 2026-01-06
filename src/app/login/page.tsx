@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 
 export default function LoginPage() {
   const { signIn, user } = useAuth();
