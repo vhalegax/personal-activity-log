@@ -57,17 +57,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
+      // Use server-side signup to ensure auth user + public.users row are created atomically
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        return { error: error.message };
+      const json = await res.json();
+
+      if (!res.ok) {
+        return { error: json.error || 'Failed to sign up' };
       }
 
       return { error: null };
     } catch (err) {
+      console.error('signUp error:', err);
       return { error: 'Failed to sign up' };
     }
   }, []);

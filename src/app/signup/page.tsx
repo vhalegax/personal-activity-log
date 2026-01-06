@@ -1,74 +1,59 @@
-'use client';
+"use client";
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { signupSchema, type SignupSchema } from '@/schemas/auth-schema';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const router = useRouter();
+  const { signUp } = useAuth();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
+  const form = useForm<SignupSchema>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { email: '', password: '', confirmPassword: '' },
+  });
 
-    // Client-side validation
-    if (!email || !password) {
-      setError('Email and password required');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Call our API route (handles auth + database)
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        setError(result.error || 'Failed to create account');
-        setLoading(false);
-        return;
+  const { mutateAsync, status } = useMutation<boolean, Error, SignupSchema>({
+    mutationFn: async (values: SignupSchema) => {
+      const { error } = await signUp(values.email, values.password);
+      if (error) {
+        throw new Error(error);
       }
+      return true;
+    },
+    onSuccess: () => {
+      setTimeout(() => router.push('/login'), 1200);
+    },
+  });
 
-      // Success!
-      setSuccess(true);
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
+  const isLoading = status === 'pending';
+  const isSuccess = status === 'success';
+  const isError = status === 'error';
 
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
-    } catch (err) {
-      setError('Network error. Please try again.');
-      setLoading(false);
+  const onSubmit = async (values: SignupSchema) => {
+    form.clearErrors();
+    try {
+      await mutateAsync(values);
+      form.reset();
+    } catch (err: any) {
+      form.setError('email', { type: 'manual', message: err?.message ?? 'Failed to create account' });
     }
   };
 
@@ -80,96 +65,72 @@ export default function SignUpPage() {
           <CardDescription>Sign up for Daily Worklog</CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
+          {isError && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{form.formState.errors.email?.message}</AlertDescription>
             </Alert>
           )}
 
-          {success && (
+          {isSuccess && (
             <Alert className="mb-4 border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Account created! Redirecting to login...
-              </AlertDescription>
+              <AlertDescription className="text-green-800">Account created! Redirecting to login...</AlertDescription>
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading || success}
-                required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="you@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading || success}
-                required
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-muted-foreground text-xs">Minimum 6 characters</p>
-            </div>
 
-            {/* Confirm Password */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading || success}
-                required
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Sign Up Button */}
-            <Button type="submit" className="w-full" disabled={loading || success}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? 'Creating account...' : success ? 'Account created!' : 'Sign Up'}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full" disabled={isLoading || isSuccess}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Creating account...' : isSuccess ? 'Account created!' : 'Sign Up'}
+              </Button>
+            </form>
+          </Form>
 
-          {/* Sign In Link */}
           <div className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline">
-              Sign in
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-            </div>
-
-            {/* Sign Up Button */}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? 'Creating account...' : 'Sign Up'}
-            </Button>
-          </form>
-
-          {/* Sign In Link */}
-          <div className="text-muted-foreground mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-primary hover:underline">
               Sign in

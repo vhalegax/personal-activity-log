@@ -37,8 +37,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Create user record di database table `users`
-    const { error: dbError } = await supabaseAdmin.from('users').insert([
+    // 3. Create or upsert user record di database table `users`
+    // Use upsert to avoid conflicts if a trigger already inserted the row.
+    const { error: dbError } = await supabaseAdmin.from('users').upsert([
       {
         id: data.user.id,
         email: data.user.email,
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
     ]);
 
     if (dbError) {
-      // Rollback: delete auth user jika database insert gagal
+      // If upsert failed, rollback auth user creation and return error
       await supabaseAdmin.auth.admin.deleteUser(data.user.id);
       return NextResponse.json({ error: 'Failed to create user record' }, { status: 500 });
     }
