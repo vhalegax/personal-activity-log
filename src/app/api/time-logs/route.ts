@@ -1,58 +1,182 @@
-import { NextResponse } from "next/server";
-import { db } from "@/lib/fakeDb";
+import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(req: Request) {
-  const body = await req.json();
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+);
 
-  const { action, task_id, user_email } = body || {};
+// GET /api/time-logs?task_id=xxx&active=true
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const taskId = searchParams.get('task_id');
+    const activeOnly = searchParams.get('active') === 'true';
 
-  if (!action || !task_id || !user_email)
-    return NextResponse.json({ error: "missing" }, { status: 400 });
+    // Get user from auth token
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const user = db.findOrCreateUserByEmail(user_email);
+    const token = authHeader.replace('Bearer ', '');
+    const {
+      data: { user },
+    } = await supabaseAdmin.auth.getUser(token);
 
-  if (action === "start") {
-    // ensure no active time log for this task
-    const active = db.timeLogs.find(
-      (t) => t.task_id === task_id && t.end_at == null && t.user_id === user.id
-    );
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (active)
-      return NextResponse.json(
-        { error: "task already running" },
-        { status: 400 }
-      );
+    let query = supabaseAdmin.from('time_logs').select('*').eq('user_id', user.id);
 
-    const tl = {
-      id: `tl_${Date.now()}`,
-      task_id,
-      user_id: user.id,
-      start_at: new Date().toISOString(),
-      end_at: null,
-    };
+    if (taskId) {
+      query = query.eq('task_id', taskId);
+    }
 
-    db.timeLogs.push(tl);
-    return NextResponse.json({ timeLog: tl });
+    if (activeOnly) {
+      query = query.is('end_at', null);
+    }
+
+    query = query.order('start_at', { ascending: false });
+
+    const { data, error } = await query;
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ timeLogs: data || [] });
+  } catch (err) {
+    console.error('GET /api/time-logs error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  if (action === "stop") {
-    const active = db.timeLogs.find(
-      (t) => t.task_id === task_id && t.end_at == null && t.user_id === user.id
-    );
-
-    if (!active)
-      return NextResponse.json(
-        { error: "no active time log" },
-        { status: 400 }
-      );
-
-    active.end_at = new Date().toISOString();
-    return NextResponse.json({ timeLog: active });
-  }
-
-  return NextResponse.json({ error: "unknown action" }, { status: 400 });
 }
 
-export async function GET() {
-  return NextResponse.json({ timeLogs: db.timeLogs });
+// POST /api/time-logs - Start timer
+export async function POST(req: NextRequest) {
+  try {
+    const { task_id } = await req.json();
+
+    if (!task_id) {
+      return NextResponse.json({ error: 'task_id is required' }, { status: 400 });
+    }
+
+    // Get user from auth token
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const {
+      data: { user },
+    } = await supabaseAdmin.auth.getUser(token);
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check for existing active time log
+    const { data: existingLogs } = await supabaseAdmin
+      .from('time_logs')
+      .select('*')
+      .eq('task_id', task_id)
+      .eq('user_id', user.id)
+      .is('end_at', null);
+
+    if (existingLogs && existingLogs.length > 0) {
+      return NextResponse.json({ error: 'Timer already running for this task' }, { status: 400 });
+    }
+
+    // Create new time log
+    const { data, error } = await supabaseAdmin
+      .from('time_logs')
+      .insert([
+        {
+          task_id,
+          user_id: user.id,
+          start_at: new Date().toISOString(),
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ timeLog: data }, { status: 201 });
+  } catch (err) {
+    console.error('POST /api/time-logs error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// PATCH /api/time-logs - Stop timer
+export async function PATCH(req: NextRequest) {
+  try {
+    const { time_log_id } = await req.json();
+
+    if (!time_log_id) {
+      return NextResponse.json({ error: 'time_log_id is required' }, { status: 400 });
+    }
+
+    // Get user from auth token
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const {
+      data: { user },
+    } = await supabaseAdmin.auth.getUser(token);
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get the time log
+    const { data: timeLog, error: fetchError } = await supabaseAdmin
+      .from('time_logs')
+      .select('*')
+      .eq('id', time_log_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (fetchError || !timeLog) {
+      return NextResponse.json({ error: 'Time log not found' }, { status: 404 });
+    }
+
+    if (timeLog.end_at) {
+      return NextResponse.json({ error: 'Timer already stopped' }, { status: 400 });
+    }
+
+    // Calculate duration
+    const endTime = new Date();
+    const startTime = new Date(timeLog.start_at);
+    const durationSeconds = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+
+    // Update time log
+    const { data, error } = await supabaseAdmin
+      .from('time_logs')
+      .update({
+        end_at: endTime.toISOString(),
+        duration: durationSeconds,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', time_log_id)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ timeLog: data });
+  } catch (err) {
+    console.error('PATCH /api/time-logs error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

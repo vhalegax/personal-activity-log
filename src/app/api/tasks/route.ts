@@ -38,7 +38,10 @@ export async function GET(req: NextRequest) {
 
     // Apply filters (only if provided)
     if (validatedFilters.search) {
-      query = query.ilike('title', `%${validatedFilters.search}%`);
+      // Search across multiple fields: title, description, pic, requester
+      query = query.or(
+        `title.ilike.%${validatedFilters.search}%,description.ilike.%${validatedFilters.search}%,pic.ilike.%${validatedFilters.search}%,requester.ilike.%${validatedFilters.search}%`,
+      );
     }
 
     if (validatedFilters.status) {

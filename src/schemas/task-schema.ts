@@ -19,14 +19,19 @@ export const createTaskSchema = z.object({
     .max(5000, { message: 'Description must be less than 5000 characters' })
     .optional()
     .nullable(),
+  type: TaskType.default('Working'),
+  parent_task_id: z.string().uuid().optional().nullable(),
   project_id: z.string().uuid().optional().nullable(),
   requester: z.string().trim().max(255).optional().nullable(),
   pic: z.string().trim().max(255).optional().nullable(),
   status: TaskStatus.default('To Do'),
-  type: TaskType.default('Working'),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+
+// Update Task Schema (same as create but all fields optional except what user wants to update)
+export const updateTaskSchema = createTaskSchema.partial();
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
 // Filter Tasks Schema
 export const filterTasksSchema = z.object({
