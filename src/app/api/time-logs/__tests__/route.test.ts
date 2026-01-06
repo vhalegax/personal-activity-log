@@ -48,7 +48,14 @@ describe('POST /api/time-logs - Start Timer', () => {
       return {
         eq: vi.fn().mockReturnThis(),
         is: vi.fn().mockResolvedValue({
-          data: [{ id: 'existing-log', task_id: 'task-1', end_at: null }],
+          data: [
+            {
+              id: 'existing-log',
+              task_id: 'task-1',
+              end_at: null,
+              tasks: { title: 'another task' },
+            },
+          ],
         }),
       };
     });
@@ -63,7 +70,7 @@ describe('POST /api/time-logs - Start Timer', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Timer already running for this task');
+    expect(data.error).toContain('Timer already running');
   });
 
   it('should start timer successfully when no active timer exists', async () => {
@@ -77,12 +84,10 @@ describe('POST /api/time-logs - Start Timer', () => {
         return {
           select: () => ({
             eq: () => ({
-              eq: () => ({
-                is: () =>
-                  Promise.resolve({
-                    data: [],
-                  }),
-              }),
+              is: () =>
+                Promise.resolve({
+                  data: [],
+                }),
             }),
           }),
           insert: () => ({

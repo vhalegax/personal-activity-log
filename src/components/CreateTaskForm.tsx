@@ -109,50 +109,62 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
         {getFieldError('title') && <p className="text-xs text-red-500">{getFieldError('title')}</p>}
       </div>
 
-      {/* Description */}
-      <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium">
-          Description
-        </label>
-        <Textarea
-          id="description"
-          placeholder="Enter task description..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          disabled={loading}
-          rows={4}
-          className={getFieldError('description') ? 'border-red-500' : ''}
-        />
-        {getFieldError('description') && (
-          <p className="text-xs text-red-500">{getFieldError('description')}</p>
-        )}
-      </div>
-
-      {/* Row: Project & Requester */}
+      {/* Row: Type & Status */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="project" className="text-sm font-medium">
-            Project
+          <label htmlFor="type" className="text-sm font-medium">
+            Type
           </label>
-          <Select value={projectId} onValueChange={setProjectId} disabled={loading}>
-            <SelectTrigger
-              id="project"
-              className={getFieldError('project_id') ? 'border-red-500' : ''}
-            >
-              <SelectValue placeholder="Select project..." />
+          <Select value={type} onValueChange={setType} disabled={loading}>
+            <SelectTrigger id="type" className={getFieldError('type') ? 'border-red-500' : ''}>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No Project</SelectItem>
-              {projects.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.name}
-                </SelectItem>
-              ))}
+              <SelectItem value="Working">Working</SelectItem>
+              <SelectItem value="Learning">Learning</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
             </SelectContent>
           </Select>
-          {getFieldError('project_id') && (
-            <p className="text-xs text-red-500">{getFieldError('project_id')}</p>
+          {getFieldError('type') && <p className="text-xs text-red-500">{getFieldError('type')}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="status" className="text-sm font-medium">
+            Status
+          </label>
+          <Select value={status} onValueChange={setStatus} disabled={loading}>
+            <SelectTrigger id="status" className={getFieldError('status') ? 'border-red-500' : ''}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="To Do">To Do</SelectItem>
+              <SelectItem value="In Progress">In Progress</SelectItem>
+              <SelectItem value="Review">Review</SelectItem>
+              <SelectItem value="Done">Done</SelectItem>
+              <SelectItem value="Cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+          {getFieldError('status') && (
+            <p className="text-xs text-red-500">{getFieldError('status')}</p>
           )}
+        </div>
+      </div>
+
+      {/* Row: PIC & Requester */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="pic" className="text-sm font-medium">
+            PIC (Person In Charge)
+          </label>
+          <Input
+            id="pic"
+            placeholder="Enter PIC name..."
+            value={pic}
+            onChange={(e) => setPic(e.target.value)}
+            disabled={loading}
+            className={getFieldError('pic') ? 'border-red-500' : ''}
+          />
+          {getFieldError('pic') && <p className="text-xs text-red-500">{getFieldError('pic')}</p>}
         </div>
 
         <div className="space-y-2">
@@ -173,60 +185,48 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
         </div>
       </div>
 
-      {/* Row: PIC & Type */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label htmlFor="pic" className="text-sm font-medium">
-            PIC (Person In Charge)
-          </label>
-          <Input
-            id="pic"
-            placeholder="Enter PIC name..."
-            value={pic}
-            onChange={(e) => setPic(e.target.value)}
-            disabled={loading}
-            className={getFieldError('pic') ? 'border-red-500' : ''}
-          />
-          {getFieldError('pic') && <p className="text-xs text-red-500">{getFieldError('pic')}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="type" className="text-sm font-medium">
-            Type
-          </label>
-          <Select value={type} onValueChange={setType} disabled={loading}>
-            <SelectTrigger id="type" className={getFieldError('type') ? 'border-red-500' : ''}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Working">Working</SelectItem>
-              <SelectItem value="Learning">Learning</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-          {getFieldError('type') && <p className="text-xs text-red-500">{getFieldError('type')}</p>}
-        </div>
+      {/* Description */}
+      <div className="space-y-2">
+        <label htmlFor="description" className="text-sm font-medium">
+          Description
+        </label>
+        <Textarea
+          id="description"
+          placeholder="Enter task description..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          disabled={loading}
+          rows={4}
+          className={getFieldError('description') ? 'border-red-500' : ''}
+        />
+        {getFieldError('description') && (
+          <p className="text-xs text-red-500">{getFieldError('description')}</p>
+        )}
       </div>
 
-      {/* Row: Status */}
+      {/* Row: Project */}
       <div className="space-y-2">
-        <label htmlFor="status" className="text-sm font-medium">
-          Status
+        <label htmlFor="project" className="text-sm font-medium">
+          Project
         </label>
-        <Select value={status} onValueChange={setStatus} disabled={loading}>
-          <SelectTrigger id="status" className={getFieldError('status') ? 'border-red-500' : ''}>
-            <SelectValue />
+        <Select value={projectId} onValueChange={setProjectId} disabled={loading}>
+          <SelectTrigger
+            id="project"
+            className={getFieldError('project_id') ? 'border-red-500' : ''}
+          >
+            <SelectValue placeholder="Select project..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="To Do">To Do</SelectItem>
-            <SelectItem value="In Progress">In Progress</SelectItem>
-            <SelectItem value="Review">Review</SelectItem>
-            <SelectItem value="Done">Done</SelectItem>
-            <SelectItem value="Cancelled">Cancelled</SelectItem>
+            <SelectItem value="">No Project</SelectItem>
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        {getFieldError('status') && (
-          <p className="text-xs text-red-500">{getFieldError('status')}</p>
+        {getFieldError('project_id') && (
+          <p className="text-xs text-red-500">{getFieldError('project_id')}</p>
         )}
       </div>
 

@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase-client';
 import {
   createTaskSchema,
@@ -30,7 +31,7 @@ import {
 } from '@/schemas/task-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Clock, Edit, Loader2, Play, Square, Timer } from 'lucide-react';
+import { ArrowLeft, Clock, Loader2, Play, Square, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -171,6 +172,7 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
 
 function TimerControls({ taskId }: { taskId: string }) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: activeLog } = useQuery<TimeLog | null>({
     queryKey: ['active-time-log', taskId],
@@ -220,6 +222,13 @@ function TimerControls({ taskId }: { taskId: string }) {
       queryClient.invalidateQueries({ queryKey: ['active-time-log', taskId] });
       queryClient.invalidateQueries({ queryKey: ['time-logs', taskId] });
       queryClient.invalidateQueries({ queryKey: ['active-timer'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Cannot start timer',
+        description: error.message,
+      });
     },
   });
 
@@ -299,7 +308,6 @@ export default function TaskDetailPage() {
   const params = useParams();
   const router = useRouter();
   const taskId = params?.id as string;
-  const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch task details
@@ -372,7 +380,6 @@ export default function TaskDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task', taskId] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      setIsEditing(false);
     },
   });
 
@@ -410,193 +417,150 @@ export default function TaskDetailPage() {
   return (
     <div className="container mx-auto space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <Link href="/tasks">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Tasks
           </Button>
         </Link>
-        {!isEditing && (
-          <Button variant="outline" onClick={() => setIsEditing(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Task
-          </Button>
-        )}
       </div>
 
       {/* Task Details */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              {!isEditing ? (
-                <>
-                  <CardTitle className="text-2xl">{task.title}</CardTitle>
-                  <CardDescription className="mt-2">
-                    {task.description || 'No description'}
-                  </CardDescription>
-                  {(task.pic || task.requester) && (
-                    <div className="text-muted-foreground mt-3 flex gap-4 text-sm">
-                      {task.pic && (
-                        <div>
-                          <span className="font-medium">PIC:</span> {task.pic}
-                        </div>
-                      )}
-                      {task.requester && (
-                        <div>
-                          <span className="font-medium">Requester:</span> {task.requester}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Title *</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              value={field.value || ''}
-                              className="min-h-[100px]"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="type"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Type</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {TaskType.options.map((type) => (
-                                  <SelectItem key={type} value={type}>
-                                    {type}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {TaskStatus.options.map((status) => (
-                                  <SelectItem key={status} value={status}>
-                                    {status}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="pic"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>PIC</FormLabel>
-                            <FormControl>
-                              <Input {...field} value={field.value || ''} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="requester"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Requester</FormLabel>
-                            <FormControl>
-                              <Input {...field} value={field.value || ''} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    {form.formState.errors.root && (
-                      <p className="text-destructive text-sm font-medium">
-                        {form.formState.errors.root.message}
-                      </p>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={updateMutation.isPending}>
-                        {updateMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Save Changes
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              )}
-            </div>
-            {!isEditing && (
-              <div className="flex gap-2">
-                <Badge>{task.type}</Badge>
-                <Badge variant="outline">{task.status}</Badge>
-              </div>
-            )}
-          </div>
+          <CardTitle>Task Details</CardTitle>
         </CardHeader>
+        <CardContent>
+          <div className="flex-1">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title *</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TaskType.options.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TaskStatus.options.map((status) => (
+                              <SelectItem key={status} value={status}>
+                                {status}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="pic"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>PIC</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="requester"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Requester</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} value={field.value || ''} className="min-h-[100px]" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.formState.errors.root && (
+                  <p className="text-destructive text-sm font-medium">
+                    {form.formState.errors.root.message}
+                  </p>
+                )}
+
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={updateMutation.isPending}>
+                    {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Timer Section */}

@@ -43,7 +43,7 @@ describe('POST /api/auth', () => {
 
   it('should create or find user with valid email', async () => {
     const mockUser = { id: '123', email: 'test@example.com' };
-    vi.mocked(db.findOrCreateUserByEmail).mockReturnValue(mockUser);
+    (db.findOrCreateUserByEmail as any).mockReturnValue(mockUser);
 
     const request = new NextRequest('http://localhost:3000/api/auth', {
       method: 'POST',
