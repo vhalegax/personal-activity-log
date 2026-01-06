@@ -55,25 +55,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = useCallback(
-    async (email: string, password: string) => {
-      try {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
+  const signUp = useCallback(async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-        if (error) {
-          return { error: error.message };
-        }
-
-        return { error: null };
-      } catch (err) {
-        return { error: 'Failed to sign up' };
+      if (error) {
+        return { error: error.message };
       }
-    },
-    [],
-  );
+
+      return { error: null };
+    } catch (err) {
+      return { error: 'Failed to sign up' };
+    }
+  }, []);
 
   const signIn = useCallback(
     async (email: string, password: string) => {

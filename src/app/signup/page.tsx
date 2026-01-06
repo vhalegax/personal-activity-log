@@ -1,17 +1,15 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
-import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SignUpPage() {
-  const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,7 +22,12 @@ export default function SignUpPage() {
     setError(null);
     setSuccess(false);
 
-    // Validation
+    // Client-side validation
+    if (!email || !password) {
+      setError('Email and password required');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -37,21 +40,40 @@ export default function SignUpPage() {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password);
-    if (error) {
-      setError(error);
-    } else {
+    try {
+      // Call our API route (handles auth + database)
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || 'Failed to create account');
+        setLoading(false);
+        return;
+      }
+
+      // Success!
       setSuccess(true);
       setEmail('');
       setPassword('');
       setConfirmPassword('');
-    }
 
-    setLoading(false);
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="bg-background flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
@@ -66,10 +88,10 @@ export default function SignUpPage() {
           )}
 
           {success && (
-            <Alert className="mb-4 bg-green-50 border-green-200">
+            <Alert className="mb-4 border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
-                Account created! Check your email to confirm.
+                Account created! Redirecting to login...
               </AlertDescription>
             </Alert>
           )}
@@ -84,7 +106,7 @@ export default function SignUpPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
+                disabled={loading || success}
                 required
               />
             </div>
@@ -98,10 +120,10 @@ export default function SignUpPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
+                disabled={loading || success}
                 required
               />
-              <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
+              <p className="text-muted-foreground text-xs">Minimum 6 characters</p>
             </div>
 
             {/* Confirm Password */}
@@ -113,9 +135,30 @@ export default function SignUpPage() {
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading}
+                disabled={loading || success}
                 required
               />
+            </div>
+
+            {/* Sign Up Button */}
+            <Button type="submit" className="w-full" disabled={loading || success}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading ? 'Creating account...' : success ? 'Account created!' : 'Sign Up'}
+            </Button>
+          </form>
+
+          {/* Sign In Link */}
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <Link href="/login" className="text-primary hover:underline">
+              Sign in
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
             </div>
 
             {/* Sign Up Button */}
@@ -126,7 +169,7 @@ export default function SignUpPage() {
           </form>
 
           {/* Sign In Link */}
-          <div className="mt-4 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-primary hover:underline">
               Sign in

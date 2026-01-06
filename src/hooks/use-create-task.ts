@@ -1,7 +1,7 @@
+import { supabase } from '@/lib/supabase-client';
 import { createTaskSchema, type CreateTaskInput } from '@/schemas/task-schema';
 import { useState } from 'react';
 import { ZodError } from 'zod';
-import { supabase } from '@/lib/supabase-client';
 
 interface UseCreateTaskResult {
   loading: boolean;
@@ -44,7 +44,7 @@ export function useCreateTask(): UseCreateTaskResult {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify(validatedData),
       });

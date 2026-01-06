@@ -1,15 +1,15 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/use-auth';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-import { AlertCircle, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function LoginPage() {
   const { signIn, user } = useAuth();
@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="bg-background flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign In</CardTitle>
@@ -89,7 +89,7 @@ export default function LoginPage() {
           </form>
 
           {/* Sign Up Link */}
-          <div className="mt-4 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground mt-4 text-center text-sm">
             Don't have an account?{' '}
             <Link href="/signup" className="text-primary hover:underline">
               Sign up
@@ -97,8 +97,8 @@ export default function LoginPage() {
           </div>
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-3 bg-muted rounded-lg text-sm">
-            <p className="font-medium mb-2">Demo Credentials:</p>
+          <div className="bg-muted mt-6 rounded-lg p-3 text-sm">
+            <p className="mb-2 font-medium">Demo Credentials:</p>
             <p>Email: demo@example.com</p>
             <p>Password: demo123456</p>
           </div>

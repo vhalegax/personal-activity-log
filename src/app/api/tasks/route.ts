@@ -1,8 +1,8 @@
 import { supabase } from '@/lib/supabase-client';
 import { createTaskSchema, filterTasksSchema } from '@/schemas/task-schema';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { createClient } from '@supabase/supabase-js';
 
 // Create admin client for server-side operations (bypass RLS)
 const supabaseAdmin = createClient(

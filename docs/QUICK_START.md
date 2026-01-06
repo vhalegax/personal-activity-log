@@ -69,21 +69,25 @@ Buka browser: http://localhost:3000
 ## Step 6: Test Auth Flow
 
 ### 1. Create Account
+
 - Go to: http://localhost:3000/signup
 - Fill: email & password
 - Click "Sign Up"
 
 ### 2. Sign In
+
 - Go to: http://localhost:3000/login
 - Use credentials dari signup
 - Click "Sign In"
 
 ### 3. Create Task
+
 - Fill task form
 - Click "Create Task"
 - Should success dengan your user ID!
 
 ### 4. Sign Out
+
 - Click "Sign Out" di header
 - Back to login
 
@@ -105,13 +109,13 @@ Buka browser: http://localhost:3000
 
 ## 📁 Key Pages
 
-| Page | Purpose | Auth Required |
-|------|---------|---------------|
-| / | Main app / task list | ✅ Yes |
-| /login | Sign in | ❌ No |
-| /signup | Create account | ❌ No |
-| /tasks | View tasks | ✅ Yes |
-| /reports | View reports | ✅ Yes |
+| Page     | Purpose              | Auth Required |
+| -------- | -------------------- | ------------- |
+| /        | Main app / task list | ✅ Yes        |
+| /login   | Sign in              | ❌ No         |
+| /signup  | Create account       | ❌ No         |
+| /tasks   | View tasks           | ✅ Yes        |
+| /reports | View reports         | ✅ Yes        |
 
 ---
 
@@ -121,13 +125,16 @@ Buka browser: http://localhost:3000
 - **Database:** [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
 
 # 2. Link ke project Supabase kamu
+
 supabase link --project-ref YOUR_PROJECT_REF
 
 # 3. Push migrations
+
 supabase db push
 
 # 4. Tunggu selesai ✅
-```
+
+````
 
 ### Option B: Manual SQL Script
 
@@ -148,7 +155,7 @@ import { CreateTaskForm } from '@/components/CreateTaskForm';
     // Refresh task list atau action lain
   }}
 />;
-```
+````
 
 ### Tasks List with Filters:
 

@@ -1,24 +1,24 @@
-import "../assets/styles/globals.css";
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { AuthProvider } from "@/hooks/use-auth";
+import '../assets/styles/globals.css';
+import { AuthProvider } from '@/hooks/use-auth';
+import type { Metadata } from 'next';
+import localFont from 'next/font/local';
 
 const geistSans = localFont({
-  src: "../assets/fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+  src: '../assets/fonts/GeistVF.woff',
+  variable: '--font-geist-sans',
+  weight: '100 900',
 });
 const geistMono = localFont({
-  src: "../assets/fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+  src: '../assets/fonts/GeistMonoVF.woff',
+  variable: '--font-geist-mono',
+  weight: '100 900',
 });
 
 export const metadata: Metadata = {
-  title: "Daily Worklog - Task Management",
-  description: "A modern task management app with Supabase and TailwindCSS",
+  title: 'Daily Worklog - Task Management',
+  description: 'A modern task management app with Supabase and TailwindCSS',
   icons: {
-    icon: "/favicon.ico",
+    icon: '/favicon.ico',
   },
 };
 

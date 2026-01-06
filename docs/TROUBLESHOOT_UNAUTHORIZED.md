@@ -11,7 +11,9 @@ POST /api/tasks → Error: Unauthorized (401)
 ## 🔧 Root Cause Analysis
 
 ### Masalah Utama
+
 RLS (Row Level Security) Policy mengharuskan user authenticated di Supabase Auth:
+
 ```sql
 -- RLS policy mengecek: auth.uid() ada atau tidak
 CREATE POLICY "Users can create tasks"
@@ -59,10 +61,12 @@ SUPABASE_SERVICE_ROLE_KEY=xxx  # PENTING! Jangan lupa ini
 ```
 
 **Where to get:**
+
 - Supabase Dashboard → Settings → API
 - Copy: **Project URL**, **anon public**, **service_role secret**
 
 ### 2. Restart Dev Server
+
 ```bash
 # Hentikan server
 Ctrl+C
@@ -72,6 +76,7 @@ bun dev
 ```
 
 ### 3. Test Create Task
+
 - Buka browser: http://localhost:3000
 - Coba buat task baru
 - Seharusnya berhasil ✅
@@ -101,11 +106,13 @@ Task Created ✅
 ## ⚠️ Production Considerations
 
 **Current Setup:** Server-side dengan hardcoded user ID
+
 ```typescript
 const demoUserId = '00000000-0000-0000-0000-000000000001';
 ```
 
 ### Untuk Production:
+
 1. **Implement Supabase Auth** - Add login/signup
 2. **Get user session** - Track real user ID
 3. **Update API** - Set `created_by: actualUser.id`
@@ -116,14 +123,12 @@ const {
   data: { user },
 } = await supabase.auth.getUser();
 
-const { data, error } = await supabaseAdmin
-  .from('tasks')
-  .insert([
-    {
-      ...validatedData,
-      created_by: user.id, // Real user!
-    },
-  ]);
+const { data, error } = await supabaseAdmin.from('tasks').insert([
+  {
+    ...validatedData,
+    created_by: user.id, // Real user!
+  },
+]);
 ```
 
 ---
@@ -131,6 +136,7 @@ const { data, error } = await supabaseAdmin
 ## 🆘 Masih Error?
 
 ### Check 1: .env Variables
+
 ```bash
 # Terminal
 echo $SUPABASE_SERVICE_ROLE_KEY
@@ -139,6 +145,7 @@ echo $SUPABASE_SERVICE_ROLE_KEY
 ```
 
 ### Check 2: Browser Console
+
 ```javascript
 // F12 → Console → test
 const response = await fetch('/api/tasks', {
@@ -156,6 +163,7 @@ console.log(result);
 ```
 
 ### Check 3: Server Logs
+
 ```bash
 # Terminal (tempat bun dev jalan)
 # Lihat error message lengkap di sini
@@ -176,6 +184,7 @@ console.log(result);
 Sekarang task creation harus work! ✅
 
 Untuk improvement kedepannya:
+
 1. [ ] Implement proper Supabase Auth
 2. [ ] Setup Supabase session management
 3. [ ] Create user management page

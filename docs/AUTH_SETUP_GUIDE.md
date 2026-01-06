@@ -31,6 +31,7 @@ Panduan lengkap setup Supabase Authentication untuk Daily Worklog.
 ### Step 2: Configure Email Templates (Optional)
 
 Settings → Email Templates:
+
 - Confirm signup email
 - Password reset email
 - Magic link email
@@ -58,7 +59,8 @@ SUPABASE_SERVICE_ROLE_KEY=xxx
 NODE_ENV=development
 ```
 
-**IMPORTANT:** 
+**IMPORTANT:**
+
 - `NEXT_PUBLIC_*` = Safe untuk client (dibuka di browser)
 - `SUPABASE_SERVICE_ROLE_KEY` = JANGAN expose! Server only!
 
@@ -89,6 +91,7 @@ Database Queries (real user ID)
 ## 🎯 User Flow
 
 ### Sign Up
+
 ```
 User Signup Page
   ↓
@@ -102,6 +105,7 @@ Redirect ke Login
 ```
 
 ### Sign In
+
 ```
 User Login Page
   ↓
@@ -115,6 +119,7 @@ AuthContext update (user logged in)
 ```
 
 ### Create Task
+
 ```
 User Fill Form
   ↓
@@ -156,16 +161,19 @@ src/
 ## 🔐 Security Features
 
 ### 1. Session Management
+
 - Token disimpan di browser (secure HttpOnly cookies via Supabase)
 - Auto refresh sebelum expire
 - Auto logout jika session invalid
 
 ### 2. Token Verification
+
 - API routes verify token sebelum akses database
 - Token expire protection
 - CORS handled oleh Supabase
 
 ### 3. User Isolation
+
 - Task dibuat dengan real user ID
 - User hanya bisa access own tasks (via RLS jika diaktifkan)
 - Service role key hanya di server
@@ -175,6 +183,7 @@ src/
 ## 🧪 Testing Auth Flow
 
 ### 1. Test Sign Up
+
 ```bash
 # Browser: http://localhost:3000/signup
 # 1. Enter email & password
@@ -184,6 +193,7 @@ src/
 ```
 
 ### 2. Test Sign In
+
 ```bash
 # Browser: http://localhost:3000/login
 # 1. Enter email & password dari signup
@@ -193,6 +203,7 @@ src/
 ```
 
 ### 3. Test Create Task
+
 ```bash
 # 1. Di logged in state, fill task form
 # 2. Click "Create Task"
@@ -201,6 +212,7 @@ src/
 ```
 
 ### 4. Test Sign Out
+
 ```bash
 # 1. Click "Sign Out" button di header
 # 2. Redirect ke /login
@@ -212,6 +224,7 @@ src/
 ## 🛠️ API Reference
 
 ### Sign Up
+
 ```typescript
 const { error } = await supabase.auth.signUp({
   email: 'user@example.com',
@@ -220,6 +233,7 @@ const { error } = await supabase.auth.signUp({
 ```
 
 ### Sign In
+
 ```typescript
 const { error } = await supabase.auth.signInWithPassword({
   email: 'user@example.com',
@@ -228,19 +242,26 @@ const { error } = await supabase.auth.signInWithPassword({
 ```
 
 ### Get Session
+
 ```typescript
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 // session.access_token untuk API calls
 ```
 
 ### Sign Out
+
 ```typescript
 await supabase.auth.signOut();
 ```
 
 ### Get User (Server-side)
+
 ```typescript
-const { data: { user } } = await supabase.auth.getUser(token);
+const {
+  data: { user },
+} = await supabase.auth.getUser(token);
 // user.id untuk database queries
 ```
 
@@ -249,26 +270,35 @@ const { data: { user } } = await supabase.auth.getUser(token);
 ## 🚨 Common Issues & Solutions
 
 ### Issue: "Unauthorized" di login page
+
 **Solution:** Pastikan Email provider enabled di Supabase Dashboard
 
 ### Issue: Token invalid/expired
+
 **Solution:** Supabase auto refresh, tapi cek session:
+
 ```typescript
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 console.log(session); // Should have access_token
 ```
 
 ### Issue: User tidak ter-save di tasks
+
 **Solution:** Check API route menerima token:
+
 ```typescript
 const token = req.headers.get('authorization')?.replace('Bearer ', '');
 ```
 
 ### Issue: "Please fix the errors below" tanpa field errors
+
 **Solution:** Check field name consistency antara frontend & API:
+
 ```typescript
 // Frontend
-title: "string"
+title: 'string';
 
 // API validation harus: "title"
 ```
@@ -278,17 +308,20 @@ title: "string"
 ## 🔄 Next Steps
 
 ### Phase 1: Basic Auth (Done ✅)
+
 - ✅ Sign up/in/out
 - ✅ Session management
 - ✅ Protected routes
 
 ### Phase 2: Enhanced Auth
+
 - [ ] Email confirmation modal
 - [ ] Password reset
 - [ ] Email verification
 - [ ] OAuth (Google, GitHub)
 
 ### Phase 3: User Management
+
 - [ ] User profile page
 - [ ] Change password
 - [ ] Delete account
