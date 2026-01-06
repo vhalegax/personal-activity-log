@@ -9,11 +9,9 @@
     "lint": "next lint",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:ai": "prettier --write \"src/app/api/**/*.{ts,tsx,js,jsx}\" \"src/components/**/*.{ts,tsx,js,jsx}\"",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:watch": "vitest --watch",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:run": "bunx vitest run",
+    "test:watch": "bunx vitest --watch",
+    "test:coverage": "bunx vitest run --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -76,6 +74,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "4.0.16",
     "eslint": "^8",
     "eslint-config-next": "15.0.4",
     "jsdom": "^27.4.0",

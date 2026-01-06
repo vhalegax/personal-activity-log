@@ -42,3 +42,7 @@ pnpm-debug.log*
 # Generated cache
 .cache/
 node_modules
+
+# Test coverage
+coverage/
+*.lcov
