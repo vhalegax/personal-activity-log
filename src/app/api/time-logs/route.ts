@@ -77,16 +77,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check for existing active time log
+    // Check for ANY existing active time log (only 1 task can run at a time)
     const { data: existingLogs } = await supabaseAdmin
       .from('time_logs')
-      .select('*')
-      .eq('task_id', task_id)
+      .select('*, tasks(title)')
       .eq('user_id', user.id)
       .is('end_at', null);
 
     if (existingLogs && existingLogs.length > 0) {
-      return NextResponse.json({ error: 'Timer already running for this task' }, { status: 400 });
+      const activeTask = existingLogs[0].tasks as any;
+      const taskTitle = activeTask?.title || 'another task';
+      return NextResponse.json(
+        { error: `Timer already running for "${taskTitle}". Please stop it first.` },
+        { status: 400 },
+      );
     }
 
     // Create new time log

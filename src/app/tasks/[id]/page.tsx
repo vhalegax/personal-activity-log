@@ -97,7 +97,6 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
       const result = await response.json();
       return result.timeLogs || [];
     },
-    refetchInterval: 5000, // Refetch every 5 seconds for active timer
   });
 
   if (isLoading) {
@@ -120,37 +119,52 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
 
   return (
     <div className="space-y-2">
-      {timeLogs.map((log) => (
-        <Card key={log.id}>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="text-muted-foreground h-4 w-4" />
-                  <span className="font-medium">Start:</span>
-                  <span>{formatDateTime(log.start_at)}</span>
-                </div>
-                {log.end_at && (
+      {timeLogs.map((log) => {
+        // Calculate duration in code from start_at and end_at
+        let calculatedDuration = log.duration;
+        if (log.start_at && log.end_at) {
+          const startTime = new Date(log.start_at).getTime();
+          const endTime = new Date(log.end_at).getTime();
+          calculatedDuration = Math.floor((endTime - startTime) / 1000);
+        } else if (log.start_at && !log.end_at) {
+          // Still running - calculate from start to now
+          const startTime = new Date(log.start_at).getTime();
+          const now = new Date().getTime();
+          calculatedDuration = Math.floor((now - startTime) / 1000);
+        }
+
+        return (
+          <Card key={log.id}>
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm">
-                    <Square className="text-muted-foreground h-4 w-4" />
-                    <span className="font-medium">End:</span>
-                    <span>{formatDateTime(log.end_at)}</span>
+                    <Clock className="text-muted-foreground h-4 w-4" />
+                    <span className="font-medium">Start:</span>
+                    <span>{formatDateTime(log.start_at)}</span>
                   </div>
-                )}
-                {!log.end_at && (
-                  <Badge variant="outline" className="bg-green-50 text-green-700">
-                    Active
-                  </Badge>
-                )}
+                  {log.end_at && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Square className="text-muted-foreground h-4 w-4" />
+                      <span className="font-medium">End:</span>
+                      <span>{formatDateTime(log.end_at)}</span>
+                    </div>
+                  )}
+                  {!log.end_at && (
+                    <Badge variant="outline" className="bg-green-50 text-green-700">
+                      Active
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold">{formatDuration(calculatedDuration)}</div>
+                  <p className="text-muted-foreground text-xs">Duration</p>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">{formatDuration(log.duration)}</div>
-                <p className="text-muted-foreground text-xs">Duration</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
@@ -176,7 +190,6 @@ function TimerControls({ taskId }: { taskId: string }) {
       const result = await response.json();
       return result.timeLogs?.[0] || null;
     },
-    refetchInterval: 2000, // Check every 2 seconds
   });
 
   const startMutation = useMutation({
@@ -206,6 +219,7 @@ function TimerControls({ taskId }: { taskId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-time-log', taskId] });
       queryClient.invalidateQueries({ queryKey: ['time-logs', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['active-timer'] });
     },
   });
 
@@ -238,6 +252,7 @@ function TimerControls({ taskId }: { taskId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-time-log', taskId] });
       queryClient.invalidateQueries({ queryKey: ['time-logs', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['active-timer'] });
     },
   });
 

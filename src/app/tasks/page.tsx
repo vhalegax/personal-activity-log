@@ -1,5 +1,6 @@
 'use client';
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,7 +34,7 @@ import { supabase } from '@/lib/supabase-client';
 import { createTaskSchema, TaskType, type CreateTaskInput } from '@/schemas/task-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus, Search } from 'lucide-react';
+import { Loader2, Plus, Search, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -46,6 +47,16 @@ type Task = {
   type: string;
   status: string;
   created_at: string;
+};
+
+type ActiveTimeLog = {
+  id: string;
+  task_id: string;
+  start_at: string;
+  tasks?: {
+    id: string;
+    title: string;
+  };
 };
 
 // Truncate description to 30 characters
@@ -267,6 +278,27 @@ export default function TasksPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
+  // Fetch active timer
+  const { data: activeTimer } = useQuery<ActiveTimeLog | null>({
+    queryKey: ['active-timer'],
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return null;
+
+      const response = await fetch('/api/time-logs?active=true', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!response.ok) return null;
+
+      const result = await response.json();
+      return result.timeLogs?.[0] || null;
+    },
+  });
+
   // Fetch tasks with React Query
   const {
     data: tasks = [],
@@ -343,6 +375,22 @@ export default function TasksPage() {
         </div>
         <CreateTaskDialog />
       </div>
+
+      {/* Active Timer Alert */}
+      {activeTimer && (
+        <Alert className="border-green-200 bg-green-50">
+          <Timer className="h-4 w-4 text-green-600" />
+          <AlertDescription className="ml-2">
+            <span className="font-medium">Timer is running</span> for task:{' '}
+            <Link
+              href={`/tasks/${activeTimer.task_id}`}
+              className="font-semibold text-green-700 hover:underline"
+            >
+              {tasks.find((t) => t.id === activeTimer.task_id)?.title || 'Loading...'}
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Filters and Search */}
       <div className="flex gap-4">

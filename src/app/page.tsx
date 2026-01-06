@@ -11,10 +11,12 @@ export default function Page() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated, or to tasks if authenticated
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
+    } else if (!loading && user) {
+      router.push('/tasks');
     }
   }, [user, loading, router]);
 
@@ -32,21 +34,5 @@ export default function Page() {
     return null;
   }
 
-  return (
-    <div className="bg-background text-foreground min-h-screen">
-      <header className="flex items-center justify-between border-b p-4">
-        <div>
-          <h1 className="text-xl font-bold">daily-worklog</h1>
-          <p className="text-muted-foreground text-xs">{user.email}</p>
-        </div>
-        <Button variant="outline" onClick={signOut}>
-          Sign Out
-        </Button>
-      </header>
-
-      <main className="mx-auto max-w-3xl p-6">
-        <MvpApp />
-      </main>
-    </div>
-  );
+  return <div></div>;
 }
