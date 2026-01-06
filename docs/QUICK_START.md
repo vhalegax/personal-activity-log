@@ -1,14 +1,13 @@
-# 🚀 Quick Start - Task Management
+# 🚀 Quick Start - Daily Worklog
 
-Setup cepat dalam 5 menit.
+Setup lengkap dalam 10 menit.
 
 ---
 
-## Step 1: Install Dependency
+## Step 1: Install Dependencies
 
 ```bash
-# Sudah terinstall saat setup project
-bun add @supabase/supabase-js
+bun install
 ```
 
 ---
@@ -19,25 +18,107 @@ bun add @supabase/supabase-js
 # 1. Copy template
 cp .env.example .env.local
 
-# 2. Isi dengan credentials Supabase kamu
+# 2. Isi dengan credentials Supabase:
 # NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 # NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxxx
-# SUPABASE_SERVICE_ROLE_KEY=xxxxx
+# SUPABASE_SERVICE_ROLE_KEY=xxxxx  ← PENTING untuk API!
 ```
 
 ---
 
-## Step 3: Setup Database di Supabase
+## Step 3: Setup Database & Auth
 
-Buka file: **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**
-
-Ada 2 cara setup:
-
-### Option A: Gunakan Migration (Recommended) ✨
+### Option A: Database Migration (Recommended) ✨
 
 ```bash
-# 1. Install Supabase CLI (jika belum)
+# 1. Install Supabase CLI
 brew install supabase/tap/supabase
+
+# 2. Link ke project
+supabase link --project-ref YOUR_PROJECT_REF
+
+# 3. Push migrations
+supabase db push
+```
+
+### Option B: Manual SQL Script
+
+Buka [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) → bagian manual setup
+
+---
+
+## Step 4: Enable Email Auth
+
+1. Buka Supabase Dashboard
+2. Go to **Authentication** → **Providers**
+3. Enable **Email** provider
+4. Click **Save**
+
+---
+
+## Step 5: Start Dev Server
+
+```bash
+bun dev
+```
+
+Buka browser: http://localhost:3000
+
+---
+
+## Step 6: Test Auth Flow
+
+### 1. Create Account
+- Go to: http://localhost:3000/signup
+- Fill: email & password
+- Click "Sign Up"
+
+### 2. Sign In
+- Go to: http://localhost:3000/login
+- Use credentials dari signup
+- Click "Sign In"
+
+### 3. Create Task
+- Fill task form
+- Click "Create Task"
+- Should success dengan your user ID!
+
+### 4. Sign Out
+- Click "Sign Out" di header
+- Back to login
+
+---
+
+## ✅ Full Checklist
+
+- [ ] Dependencies installed (`bun install`)
+- [ ] `.env.local` filled dengan Supabase credentials
+- [ ] Database migrations pushed (`supabase db push`)
+- [ ] Email Auth enabled di Supabase dashboard
+- [ ] Dev server running (`bun dev`)
+- [ ] Can sign up: http://localhost:3000/signup
+- [ ] Can sign in: http://localhost:3000/login
+- [ ] Can create task logged in
+- [ ] Can see your email di header
+
+---
+
+## 📁 Key Pages
+
+| Page | Purpose | Auth Required |
+|------|---------|---------------|
+| / | Main app / task list | ✅ Yes |
+| /login | Sign in | ❌ No |
+| /signup | Create account | ❌ No |
+| /tasks | View tasks | ✅ Yes |
+| /reports | View reports | ✅ Yes |
+
+---
+
+## 📚 Dokumentasi Lengkap
+
+- **Auth Setup:** [AUTH_SETUP_GUIDE.md](./AUTH_SETUP_GUIDE.md)
+- **Database:** [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
 
 # 2. Link ke project Supabase kamu
 supabase link --project-ref YOUR_PROJECT_REF
