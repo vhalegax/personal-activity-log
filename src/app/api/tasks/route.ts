@@ -103,15 +103,29 @@ export async function POST(req: NextRequest) {
     // Get request body
     const body = await req.json();
 
+    // Get authorization header (contains session token)
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Missing authorization header' }, { status: 401 });
+    }
+
+    // Extract token from "Bearer <token>"
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify token dan get user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Validate input with schema
     const validatedData = createTaskSchema.parse(body);
 
-    // Generate a temporary user ID (since we don't have auth setup)
-    // In production, you should use supabase.auth.getUser()
-    // For now, we'll use a demo user ID
-    const demoUserId = '00000000-0000-0000-0000-000000000001';
-
-    // Use admin client to bypass RLS and insert task
+    // Use admin client to bypass RLS and insert task with real user ID
     const { data, error } = await supabaseAdmin
       .from('tasks')
       .insert([
@@ -123,7 +137,7 @@ export async function POST(req: NextRequest) {
           pic: validatedData.pic || null,
           status: validatedData.status,
           type: validatedData.type,
-          created_by: demoUserId,
+          created_by: user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           deleted_at: null,
@@ -140,7 +154,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ task: data }, { status: 201 });
   } catch (err) {
     if (err instanceof ZodError) {
-      return NextResponse.json({ error: 'Validation error', details: err.errors }, { status: 400 });
+      // Return validation errors dengan field info
+      const fieldErrors: Record<string, string> = {};
+      err.errors.forEach((error) => {
+        const fieldPath = error.path.join('.');
+        fieldErrors[fieldPath] = error.message;
+      });
+      return NextResponse.json({ error: 'Validation error', fieldErrors }, { status: 400 });
     }
 
     if (err instanceof SyntaxError) {

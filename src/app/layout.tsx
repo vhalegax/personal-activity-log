@@ -1,6 +1,7 @@
 import "../assets/styles/globals.css";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { AuthProvider } from "@/hooks/use-auth";
 
 const geistSans = localFont({
   src: "../assets/fonts/GeistVF.woff",
@@ -14,8 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "My Next.js Shadcn Starter",
-  description: "A modern Next.js starter with Shadcn/ui and TailwindCSS v4",
+  title: "Daily Worklog - Task Management",
+  description: "A modern task management app with Supabase and TailwindCSS",
   icons: {
     icon: "/favicon.ico",
   },
@@ -28,7 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

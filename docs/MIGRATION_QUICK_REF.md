@@ -25,6 +25,7 @@ supabase db push
 ## 📝 Development Workflow
 
 ### Create New Migration
+
 ```bash
 supabase migration new feature_name
 
@@ -33,6 +34,7 @@ supabase migration new feature_name
 ```
 
 ### Test & Push
+
 ```bash
 # Check what will be applied
 supabase db push --dry-run
@@ -61,12 +63,12 @@ supabase db push
 
 ## ⚠️ Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| "Password authentication failed" | `supabase unlink` → re-link dengan password benar |
-| "Database is already running" | `supabase stop` → retry |
-| Need to undo changes | Manual: delete migration file + `supabase db push` |
-| Remote & local out of sync | `supabase db pull` → review generated migration |
+| Problem                          | Solution                                           |
+| -------------------------------- | -------------------------------------------------- |
+| "Password authentication failed" | `supabase unlink` → re-link dengan password benar  |
+| "Database is already running"    | `supabase stop` → retry                            |
+| Need to undo changes             | Manual: delete migration file + `supabase db push` |
+| Remote & local out of sync       | `supabase db pull` → review generated migration    |
 
 ---
 

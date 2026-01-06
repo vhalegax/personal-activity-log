@@ -21,7 +21,7 @@ interface CreateTaskProps {
 }
 
 export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
-  const { loading, error, success, createTask, reset } = useCreateTask();
+  const { loading, error, fieldErrors, success, createTask, reset } = useCreateTask();
   const { toast } = useToast();
 
   // Form state
@@ -69,6 +69,9 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
     onSuccess?.();
   }
 
+  // Helper function to get field error
+  const getFieldError = (fieldName: string) => fieldErrors?.[fieldName];
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border p-6">
       <h2 className="text-lg font-semibold">Create New Task</h2>
@@ -101,7 +104,11 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
           onChange={(e) => setTitle(e.target.value)}
           disabled={loading}
           required
+          className={getFieldError('title') ? 'border-red-500' : ''}
         />
+        {getFieldError('title') && (
+          <p className="text-xs text-red-500">{getFieldError('title')}</p>
+        )}
       </div>
 
       {/* Description */}
@@ -116,7 +123,11 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
           onChange={(e) => setDescription(e.target.value)}
           disabled={loading}
           rows={4}
+          className={getFieldError('description') ? 'border-red-500' : ''}
         />
+        {getFieldError('description') && (
+          <p className="text-xs text-red-500">{getFieldError('description')}</p>
+        )}
       </div>
 
       {/* Row: Project & Requester */}
@@ -126,7 +137,10 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
             Project
           </label>
           <Select value={projectId} onValueChange={setProjectId} disabled={loading}>
-            <SelectTrigger id="project">
+            <SelectTrigger
+              id="project"
+              className={getFieldError('project_id') ? 'border-red-500' : ''}
+            >
               <SelectValue placeholder="Select project..." />
             </SelectTrigger>
             <SelectContent>
@@ -138,6 +152,9 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
               ))}
             </SelectContent>
           </Select>
+          {getFieldError('project_id') && (
+            <p className="text-xs text-red-500">{getFieldError('project_id')}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -150,7 +167,11 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
             value={requester}
             onChange={(e) => setRequester(e.target.value)}
             disabled={loading}
+            className={getFieldError('requester') ? 'border-red-500' : ''}
           />
+          {getFieldError('requester') && (
+            <p className="text-xs text-red-500">{getFieldError('requester')}</p>
+          )}
         </div>
       </div>
 
@@ -166,7 +187,11 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
             value={pic}
             onChange={(e) => setPic(e.target.value)}
             disabled={loading}
+            className={getFieldError('pic') ? 'border-red-500' : ''}
           />
+          {getFieldError('pic') && (
+            <p className="text-xs text-red-500">{getFieldError('pic')}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -174,7 +199,10 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
             Type
           </label>
           <Select value={type} onValueChange={setType} disabled={loading}>
-            <SelectTrigger id="type">
+            <SelectTrigger
+              id="type"
+              className={getFieldError('type') ? 'border-red-500' : ''}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -183,6 +211,9 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
               <SelectItem value="Other">Other</SelectItem>
             </SelectContent>
           </Select>
+          {getFieldError('type') && (
+            <p className="text-xs text-red-500">{getFieldError('type')}</p>
+          )}
         </div>
       </div>
 
@@ -192,7 +223,10 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
           Status
         </label>
         <Select value={status} onValueChange={setStatus} disabled={loading}>
-          <SelectTrigger id="status">
+          <SelectTrigger
+            id="status"
+            className={getFieldError('status') ? 'border-red-500' : ''}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -203,6 +237,9 @@ export function CreateTaskForm({ projects, onSuccess }: CreateTaskProps) {
             <SelectItem value="Cancelled">Cancelled</SelectItem>
           </SelectContent>
         </Select>
+        {getFieldError('status') && (
+          <p className="text-xs text-red-500">{getFieldError('status')}</p>
+        )}
       </div>
 
       {/* Submit Button */}
