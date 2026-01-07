@@ -277,8 +277,16 @@ function DescriptionEditor({
 
   return (
     <div className="space-y-2">
+      <ReactQuill
+        theme="snow"
+        value={description}
+        onChange={setDescription}
+        modules={modules}
+        placeholder="Add task description..."
+        className="min-h-[300px]"
+      />
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">Description</label>
+        <p className="text-muted-foreground text-xs">Auto-saves as you type</p>
         {saveMutation.isPending && (
           <span className="text-muted-foreground flex items-center gap-1 text-xs">
             <Loader2 className="h-3 w-3 animate-spin" />
@@ -299,15 +307,6 @@ function DescriptionEditor({
           </span>
         )}
       </div>
-      <ReactQuill
-        theme="snow"
-        value={description}
-        onChange={setDescription}
-        modules={modules}
-        placeholder="Add task description..."
-        className="min-h-[300px]"
-      />
-      <p className="text-muted-foreground text-xs">Auto-saves as you type</p>
     </div>
   );
 }
