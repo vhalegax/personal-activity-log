@@ -1,5 +1,6 @@
 import '../assets/styles/globals.css';
 import Providers from '@/components/Providers';
+import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/use-auth';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
@@ -32,7 +33,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </Providers>
       </body>
     </html>

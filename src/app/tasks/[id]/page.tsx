@@ -1,5 +1,6 @@
 'use client';
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +32,7 @@ import {
 } from '@/schemas/task-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Clock, Loader2, Play, Square, Timer } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Clock, Loader2, Play, Square, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -174,6 +175,7 @@ function TimerControls({ taskId }: { taskId: string }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  // Fetch active log for THIS task
   const { data: activeLog } = useQuery<TimeLog | null>({
     queryKey: ['active-time-log', taskId],
     queryFn: async () => {
@@ -184,6 +186,27 @@ function TimerControls({ taskId }: { taskId: string }) {
       if (!session) return null;
 
       const response = await fetch(`/api/time-logs?task_id=${taskId}&active=true`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!response.ok) return null;
+
+      const result = await response.json();
+      return result.timeLogs?.[0] || null;
+    },
+  });
+
+  // Fetch ANY active log to prevent multiple running timers
+  const { data: globalActiveLog } = useQuery<TimeLog | null>({
+    queryKey: ['active-timer'],
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return null;
+
+      const response = await fetch('/api/time-logs?active=true', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
@@ -266,40 +289,52 @@ function TimerControls({ taskId }: { taskId: string }) {
   });
 
   const isActive = !!activeLog;
+  const isAnotherTaskRunning = !!globalActiveLog && globalActiveLog.task_id !== taskId;
   const isLoading = startMutation.isPending || stopMutation.isPending;
 
   return (
-    <div className="flex gap-2">
-      {!isActive ? (
-        <Button
-          onClick={() => startMutation.mutate()}
-          disabled={isLoading}
-          size="lg"
-          className="flex-1"
-        >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Play className="mr-2 h-4 w-4" />
-          )}
-          START
-        </Button>
-      ) : (
-        <Button
-          onClick={() => stopMutation.mutate()}
-          disabled={isLoading}
-          variant="destructive"
-          size="lg"
-          className="flex-1"
-        >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Square className="mr-2 h-4 w-4" />
-          )}
-          STOP
-        </Button>
+    <div className="space-y-4">
+      {isAnotherTaskRunning && (
+        <Alert className="border-yellow-200 bg-yellow-50">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            Another task is already being tracked. Please stop it first.
+          </AlertDescription>
+        </Alert>
       )}
+
+      <div className="flex gap-2">
+        {!isActive ? (
+          <Button
+            onClick={() => startMutation.mutate()}
+            disabled={isLoading || isAnotherTaskRunning}
+            size="lg"
+            className="flex-1"
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="mr-2 h-4 w-4" />
+            )}
+            START
+          </Button>
+        ) : (
+          <Button
+            onClick={() => stopMutation.mutate()}
+            disabled={isLoading}
+            variant="destructive"
+            size="lg"
+            className="flex-1"
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Square className="mr-2 h-4 w-4" />
+            )}
+            STOP
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -442,7 +477,7 @@ export default function TaskDetailPage() {
                     <FormItem>
                       <FormLabel>Title *</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -456,7 +491,7 @@ export default function TaskDetailPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Type</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
@@ -481,7 +516,7 @@ export default function TaskDetailPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
