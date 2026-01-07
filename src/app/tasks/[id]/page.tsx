@@ -613,142 +613,146 @@ export default function TaskDetailPage() {
         </Link>
       </div>
 
-      {/* Timer Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Timer className="h-5 w-5" />
-            <CardTitle>Time Tracking</CardTitle>
-          </div>
-          <CardDescription>Track time spent on this task</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TimerControls taskId={taskId} />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Task Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Task Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex-1">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title *</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-      {/* Task Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Task Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex-1">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title *</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value ?? ''} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || undefined}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {TaskType.options.map((type) => (
+                                <SelectItem key={type} value={type}>
+                                  {type}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || undefined}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {TaskStatus.options.map((status) => (
+                                <SelectItem key={status} value={status}>
+                                  {status}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="pic"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>PIC</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="requester"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Requester</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {form.formState.errors.root && (
+                    <p className="text-destructive text-sm font-medium">
+                      {form.formState.errors.root.message}
+                    </p>
                   )}
-                />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Type</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {TaskType.options.map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {type}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={updateMutation.isPending}>
+                      {updateMutation.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Save Changes
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </CardContent>
+        </Card>
 
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {TaskStatus.options.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {status}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="pic"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>PIC</FormLabel>
-                        <FormControl>
-                          <Input {...field} value={field.value || ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="requester"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Requester</FormLabel>
-                        <FormControl>
-                          <Input {...field} value={field.value || ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {form.formState.errors.root && (
-                  <p className="text-destructive text-sm font-medium">
-                    {form.formState.errors.root.message}
-                  </p>
-                )}
-
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={updateMutation.isPending}>
-                    {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Timer Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Timer className="h-5 w-5" />
+              <CardTitle>Time Tracking</CardTitle>
+            </div>
+            <CardDescription>Track time spent on this task</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TimerControls taskId={taskId} />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Description Section - Auto-saves */}
       <Card>
