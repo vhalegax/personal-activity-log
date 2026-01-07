@@ -462,7 +462,7 @@ function TimerControls({ taskId }: { taskId: string }) {
           <Button
             onClick={() => stopMutation.mutate()}
             disabled={isLoading}
-            variant="destructive"
+            variant="default"
             size="lg"
             className="flex-1"
           >
