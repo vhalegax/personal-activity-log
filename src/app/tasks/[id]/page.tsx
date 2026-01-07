@@ -226,8 +226,7 @@ function DescriptionEditor({
     onSuccess: () => {
       // Update last saved value on successful save
       lastSavedValue.current = description;
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      // Only invalidate tasks list, NOT the current task to prevent rollback
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
     onError: (error: Error) => {
@@ -306,7 +305,7 @@ function DescriptionEditor({
         onChange={setDescription}
         modules={modules}
         placeholder="Add task description..."
-        className="min-h-[200px]"
+        className="min-h-[300px]"
       />
       <p className="text-muted-foreground text-xs">Auto-saves as you type</p>
     </div>
@@ -518,16 +517,28 @@ export default function TaskDetailPage() {
 
   const form = useForm<UpdateTaskInput>({
     resolver: zodResolver(createTaskSchema.partial()),
-    values: task
-      ? {
-          title: task.title,
-          type: task.type as any,
-          status: task.status as any,
-          pic: task.pic,
-          requester: task.requester,
-        }
-      : undefined,
+    defaultValues: {
+      title: task?.title || '',
+      type: task?.type as any,
+      status: task?.status as any,
+      pic: task?.pic || '',
+      requester: task?.requester || '',
+    },
   });
+
+  // Update form when task data changes
+  useEffect(() => {
+    if (task) {
+      form.reset({
+        title: task.title,
+        type: task.type as any,
+        status: task.status as any,
+        pic: task.pic || '',
+        requester: task.requester || '',
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task]);
 
   const updateMutation = useMutation({
     mutationFn: async (values: UpdateTaskInput) => {
@@ -601,6 +612,20 @@ export default function TaskDetailPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Timer Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Timer className="h-5 w-5" />
+            <CardTitle>Time Tracking</CardTitle>
+          </div>
+          <CardDescription>Track time spent on this task</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TimerControls taskId={taskId} />
+        </CardContent>
+      </Card>
 
       {/* Task Details */}
       <Card>
@@ -727,26 +752,8 @@ export default function TaskDetailPage() {
 
       {/* Description Section - Auto-saves */}
       <Card>
-        <CardHeader>
-          <CardTitle>Description</CardTitle>
-          <CardDescription>Notes and details about this task</CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <DescriptionEditor taskId={taskId} initialDescription={task.description} />
-        </CardContent>
-      </Card>
-
-      {/* Timer Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Timer className="h-5 w-5" />
-            <CardTitle>Time Tracking</CardTitle>
-          </div>
-          <CardDescription>Track time spent on this task</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TimerControls taskId={taskId} />
         </CardContent>
       </Card>
 
