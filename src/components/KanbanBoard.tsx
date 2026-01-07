@@ -13,6 +13,7 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCorners,
+  useDroppable,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -142,7 +143,7 @@ function TaskDragOverlay({ task }: { task: Task }) {
   );
 }
 
-// Column component for each status
+// Column component for each status - now droppable
 function KanbanColumn({
   status,
   tasks,
@@ -152,6 +153,11 @@ function KanbanColumn({
   tasks: Task[];
   activeId: string | null;
 }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: status,
+    data: { type: 'column', status },
+  });
+
   return (
     <div className="flex min-w-[280px] flex-col rounded-lg bg-gray-50">
       <div className={`rounded-t-lg p-3 ${getColumnHeaderColor(status)}`}>
@@ -162,7 +168,10 @@ function KanbanColumn({
           </Badge>
         </div>
       </div>
-      <div className="flex-1 space-y-2 p-2">
+      <div
+        ref={setNodeRef}
+        className={`min-h-[200px] flex-1 space-y-2 p-2 transition-colors ${isOver ? 'bg-blue-50' : ''}`}
+      >
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
             <SortableTaskCard key={task.id} task={task} isDragging={activeId === task.id} />
@@ -251,6 +260,11 @@ export function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) {
     return null;
   };
 
+  // Check if the id is a column status
+  const isColumn = (id: string): boolean => {
+    return columns.includes(id as any);
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     setActiveId(active.id as string);
@@ -263,20 +277,21 @@ export function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) {
 
     if (!over) return;
 
-    const activeId = active.id as string;
+    const activeTaskId = active.id as string;
     const overId = over.id as string;
 
     // Find the columns
-    const activeColumn = findColumn(activeId);
-    const overColumn = columns.includes(overId as any) ? overId : findColumn(overId);
+    const activeColumn = findColumn(activeTaskId);
+    // If overId is a column, use it directly, otherwise find the column of the task
+    const overColumn = isColumn(overId) ? overId : findColumn(overId);
 
     if (!activeColumn || !overColumn || activeColumn === overColumn) {
       return;
     }
 
-    // Move task to new column
+    // Move task to new column (optimistic update)
     setTasks((prev) =>
-      prev.map((task) => (task.id === activeId ? { ...task, status: overColumn } : task)),
+      prev.map((task) => (task.id === activeTaskId ? { ...task, status: overColumn } : task)),
     );
   };
 
@@ -288,30 +303,32 @@ export function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) {
 
     if (!over) return;
 
-    const activeId = active.id as string;
+    const activeTaskId = active.id as string;
     const overId = over.id as string;
 
-    const activeColumn = findColumn(activeId);
-    const overColumn = columns.includes(overId as any) ? overId : findColumn(overId);
+    // Find where the task is now (after handleDragOver updates)
+    const currentColumn = findColumn(activeTaskId);
+    // Determine target column - if overId is a column, use it; otherwise find the column of the target task
+    const overColumn = isColumn(overId) ? overId : findColumn(overId);
 
-    if (!activeColumn || !overColumn) return;
+    if (!currentColumn || !overColumn) return;
 
-    // If dropped in a different column, update status
-    const originalTask = initialTasks.find((t) => t.id === activeId);
-    if (originalTask && originalTask.status !== overColumn) {
-      updateStatusMutation.mutate({ taskId: activeId, newStatus: overColumn });
+    // If dropped in a different column from original, update status in database
+    const originalTask = initialTasks.find((t) => t.id === activeTaskId);
+    if (originalTask && originalTask.status !== currentColumn) {
+      updateStatusMutation.mutate({ taskId: activeTaskId, newStatus: currentColumn });
     }
 
-    // Reorder within the same column
-    if (activeColumn === overColumn && activeId !== overId) {
-      const columnTasks = tasksByStatus[activeColumn];
-      const oldIndex = columnTasks.findIndex((t) => t.id === activeId);
+    // Reorder within the same column (only if dropping on another task, not a column)
+    if (currentColumn === overColumn && activeTaskId !== overId && !isColumn(overId)) {
+      const columnTasks = tasksByStatus[currentColumn];
+      const oldIndex = columnTasks.findIndex((t) => t.id === activeTaskId);
       const newIndex = columnTasks.findIndex((t) => t.id === overId);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const reordered = arrayMove(columnTasks, oldIndex, newIndex);
         setTasks((prev) => {
-          const otherTasks = prev.filter((t) => t.status !== activeColumn);
+          const otherTasks = prev.filter((t) => t.status !== currentColumn);
           return [...otherTasks, ...reordered];
         });
       }

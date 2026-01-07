@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Combobox } from '@/components/ui/combobox';
 import {
   Dialog,
   DialogContent,
@@ -47,7 +48,13 @@ type Task = {
   description?: string | null;
   type: string;
   status: string;
+  project_id?: string | null;
   created_at: string;
+};
+
+type Project = {
+  id: string;
+  name: string;
 };
 
 type ActiveTimeLog = {
@@ -71,6 +78,27 @@ function CreateTaskDialog() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
+  // Fetch projects for the dropdown
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return [];
+
+      const response = await fetch('/api/projects', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!response.ok) return [];
+
+      const result = await response.json();
+      return result.projects || [];
+    },
+  });
+
   const form = useForm<CreateTaskInput>({
     resolver: zodResolver(createTaskSchema),
     defaultValues: {
@@ -80,6 +108,7 @@ function CreateTaskDialog() {
       status: 'To Do',
       pic: '',
       requester: '',
+      project_id: undefined,
     },
   });
 
@@ -250,6 +279,27 @@ function CreateTaskDialog() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="project_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project</FormLabel>
+                  <FormControl>
+                    <Combobox
+                      options={projects.map((p) => ({ value: p.id, label: p.name }))}
+                      value={field.value || ''}
+                      onValueChange={field.onChange}
+                      placeholder="Select project..."
+                      searchPlaceholder="Search projects..."
+                      emptyText="No projects found."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {form.formState.errors.root && (
               <p className="text-destructive text-sm font-medium">
                 {form.formState.errors.root.message}
@@ -278,7 +328,29 @@ export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [projectFilter, setProjectFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'card' | 'kanban'>('kanban');
+
+  // Fetch projects for filter dropdown
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return [];
+
+      const response = await fetch('/api/projects', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!response.ok) return [];
+
+      const result = await response.json();
+      return result.projects || [];
+    },
+  });
 
   // Fetch active timer
   const { data: activeTimer } = useQuery<ActiveTimeLog | null>({
@@ -307,7 +379,7 @@ export default function TasksPage() {
     isLoading,
     error,
   } = useQuery<Task[]>({
-    queryKey: ['tasks', searchQuery, statusFilter, typeFilter],
+    queryKey: ['tasks', searchQuery, statusFilter, typeFilter, projectFilter],
     queryFn: async () => {
       const {
         data: { session },
@@ -322,6 +394,7 @@ export default function TasksPage() {
       if (searchQuery) params.append('search', searchQuery);
       if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
       if (typeFilter && typeFilter !== 'all') params.append('type', typeFilter);
+      if (projectFilter && projectFilter !== 'all') params.append('project_id', projectFilter);
 
       const response = await fetch(`/api/tasks?${params.toString()}`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -461,6 +534,20 @@ export default function TasksPage() {
             <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Project Filter */}
+        <Combobox
+          options={[
+            { value: 'all', label: 'All Projects' },
+            ...projects.map((p) => ({ value: p.id, label: p.name })),
+          ]}
+          value={projectFilter}
+          onValueChange={(val) => setProjectFilter(val || 'all')}
+          placeholder="Filter by Project"
+          searchPlaceholder="Search projects..."
+          emptyText="No projects found."
+          className="w-[200px]"
+        />
       </div>
 
       {/* Loading State */}

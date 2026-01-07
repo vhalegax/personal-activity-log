@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Combobox } from '@/components/ui/combobox';
 import {
   Form,
   FormControl,
@@ -54,8 +55,14 @@ type Task = {
   status: string;
   pic?: string | null;
   requester?: string | null;
+  project_id?: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type Project = {
+  id: string;
+  name: string;
 };
 
 type TimeLog = {
@@ -514,30 +521,40 @@ export default function TaskDetailPage() {
     enabled: !!taskId,
   });
 
-  const form = useForm<UpdateTaskInput>({
-    resolver: zodResolver(createTaskSchema.partial()),
-    defaultValues: {
-      title: task?.title || '',
-      type: task?.type as any,
-      status: task?.status as any,
-      pic: task?.pic || '',
-      requester: task?.requester || '',
+  // Fetch projects for the dropdown
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return [];
+
+      const response = await fetch('/api/projects', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!response.ok) return [];
+
+      const result = await response.json();
+      return result.projects || [];
     },
   });
 
-  // Update form when task data changes
-  useEffect(() => {
-    if (task) {
-      form.reset({
-        title: task.title,
-        type: task.type as any,
-        status: task.status as any,
-        pic: task.pic || '',
-        requester: task.requester || '',
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task]);
+  const form = useForm<UpdateTaskInput>({
+    resolver: zodResolver(createTaskSchema.partial()),
+    values: task
+      ? {
+          title: task.title,
+          type: task.type as any,
+          status: task.status as any,
+          pic: task.pic || '',
+          requester: task.requester || '',
+          project_id: task.project_id || undefined,
+        }
+      : undefined,
+  });
 
   const updateMutation = useMutation({
     mutationFn: async (values: UpdateTaskInput) => {
@@ -717,6 +734,27 @@ export default function TaskDetailPage() {
                       )}
                     />
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="project_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Project</FormLabel>
+                        <FormControl>
+                          <Combobox
+                            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+                            value={field.value || ''}
+                            onValueChange={field.onChange}
+                            placeholder="Select project..."
+                            searchPlaceholder="Search projects..."
+                            emptyText="No projects found."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {form.formState.errors.root && (
                     <p className="text-destructive text-sm font-medium">
