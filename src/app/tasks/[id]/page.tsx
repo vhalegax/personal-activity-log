@@ -1,5 +1,6 @@
 'use client';
 
+import '@/assets/styles/quill-custom.css';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase-client';
 import {
@@ -33,10 +33,18 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, ArrowLeft, Clock, Loader2, Play, Square, Timer } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import 'react-quill-new/dist/quill.snow.css';
+
+// Dynamic import for Quill (client-side only)
+const ReactQuill = dynamic(() => import('react-quill-new'), {
+  ssr: false,
+  loading: () => <div className="h-[200px] animate-pulse rounded-md bg-gray-100" />,
+});
 
 type Task = {
   id: string;
@@ -167,6 +175,140 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
           </Card>
         );
       })}
+    </div>
+  );
+}
+
+function DescriptionEditor({
+  taskId,
+  initialDescription,
+}: {
+  taskId: string;
+  initialDescription: string | null | undefined;
+}) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [description, setDescription] = useState(initialDescription || '');
+  const lastSavedValue = useRef(initialDescription || '');
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Update local state when initial description changes
+  useEffect(() => {
+    setDescription(initialDescription || '');
+    lastSavedValue.current = initialDescription || '';
+  }, [initialDescription]);
+
+  // React Query mutation for saving description
+  const saveMutation = useMutation({
+    mutationFn: async (newDescription: string) => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ description: newDescription }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save description');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      // Update last saved value on successful save
+      lastSavedValue.current = description;
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to save',
+        description: error.message,
+      });
+    },
+  });
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Don't save if content hasn't changed from last saved value
+    if (description === lastSavedValue.current) {
+      return;
+    }
+
+    // Set up debounced save (700ms)
+    saveTimeoutRef.current = setTimeout(() => {
+      saveMutation.mutate(description);
+    }, 700);
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [description, saveMutation]);
+
+  // Quill modules configuration
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['blockquote', 'code-block'],
+      ['link'],
+      ['clean'],
+    ],
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium">Description</label>
+        {saveMutation.isPending && (
+          <span className="text-muted-foreground flex items-center gap-1 text-xs">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Saving...
+          </span>
+        )}
+        {saveMutation.isSuccess && !saveMutation.isPending && (
+          <span className="flex items-center gap-1 text-xs text-green-600">
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            Saved
+          </span>
+        )}
+      </div>
+      <ReactQuill
+        theme="snow"
+        value={description}
+        onChange={setDescription}
+        modules={modules}
+        placeholder="Add task description..."
+        className="min-h-[200px]"
+      />
+      <p className="text-muted-foreground text-xs">Auto-saves as you type</p>
     </div>
   );
 }
@@ -379,7 +521,6 @@ export default function TaskDetailPage() {
     values: task
       ? {
           title: task.title,
-          description: task.description,
           type: task.type as any,
           status: task.status as any,
           pic: task.pic,
@@ -566,20 +707,6 @@ export default function TaskDetailPage() {
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} value={field.value || ''} className="min-h-[100px]" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 {form.formState.errors.root && (
                   <p className="text-destructive text-sm font-medium">
                     {form.formState.errors.root.message}
@@ -595,6 +722,17 @@ export default function TaskDetailPage() {
               </form>
             </Form>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Description Section - Auto-saves */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Description</CardTitle>
+          <CardDescription>Notes and details about this task</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DescriptionEditor taskId={taskId} initialDescription={task.description} />
         </CardContent>
       </Card>
 
