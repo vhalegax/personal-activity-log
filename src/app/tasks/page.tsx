@@ -1,5 +1,6 @@
 'use client';
 
+import { KanbanBoard } from '@/components/KanbanBoard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ import { supabase } from '@/lib/supabase-client';
 import { createTaskSchema, TaskType, type CreateTaskInput } from '@/schemas/task-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus, Search, Timer } from 'lucide-react';
+import { Kanban, LayoutList, Loader2, Plus, Search, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -277,6 +278,7 @@ export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'card' | 'kanban'>('kanban');
 
   // Fetch active timer
   const { data: activeTimer } = useQuery<ActiveTimeLog | null>({
@@ -373,7 +375,26 @@ export default function TasksPage() {
           <h1 className="text-3xl font-bold">Tasks</h1>
           <p className="text-muted-foreground">Manage and track your tasks</p>
         </div>
-        <CreateTaskDialog />
+        <div className="flex items-center gap-2">
+          {/* View Toggle */}
+          <div className="flex rounded-lg border p-1">
+            <Button
+              variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('kanban')}
+            >
+              <Kanban className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'card' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('card')}
+            >
+              <LayoutList className="h-4 w-4" />
+            </Button>
+          </div>
+          <CreateTaskDialog />
+        </div>
       </div>
 
       {/* Active Timer Alert */}
@@ -474,30 +495,36 @@ export default function TasksPage() {
         </Card>
       )}
 
-      {/* Tasks List */}
+      {/* Tasks Display */}
       {!isLoading && !error && tasks.length > 0 && (
-        <div className="space-y-4">
-          {tasks.map((task) => (
-            <Link key={task.id} href={`/tasks/${task.id}`}>
-              <Card className="cursor-pointer transition-shadow hover:shadow-md">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl">{task.title}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {truncateDescription(task.description)}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Badge className={getTypeColor(task.type)}>{task.type}</Badge>
-                      <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <>
+          {viewMode === 'kanban' ? (
+            <KanbanBoard tasks={tasks} />
+          ) : (
+            <div className="space-y-4">
+              {tasks.map((task) => (
+                <Link key={task.id} href={`/tasks/${task.id}`}>
+                  <Card className="cursor-pointer transition-shadow hover:shadow-md">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl">{task.title}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {truncateDescription(task.description)}
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge className={getTypeColor(task.type)}>{task.type}</Badge>
+                          <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
