@@ -449,7 +449,7 @@ function TimerControls({ taskId }: { taskId: string }) {
   const isLoading = startMutation.isPending || stopMutation.isPending;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {isAnotherTaskRunning && (
         <Alert className="border-yellow-200 bg-yellow-50">
           <AlertCircle className="h-4 w-4 text-yellow-600" />
@@ -459,37 +459,38 @@ function TimerControls({ taskId }: { taskId: string }) {
         </Alert>
       )}
 
-      <div className="flex gap-2">
-        {!isActive ? (
-          <Button
-            onClick={() => startMutation.mutate()}
-            disabled={isLoading || isAnotherTaskRunning}
-            size="lg"
-            className="flex-1"
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Play className="mr-2 h-4 w-4" />
-            )}
-            START
-          </Button>
-        ) : (
-          <Button
-            onClick={() => stopMutation.mutate()}
-            disabled={isLoading}
-            variant="default"
-            size="lg"
-            className="flex-1"
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Square className="mr-2 h-4 w-4" />
-            )}
-            STOP
-          </Button>
-        )}
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-muted-foreground text-sm">Track time spent on this task</p>
+        <div className="flex gap-2">
+          {!isActive ? (
+            <Button
+              onClick={() => startMutation.mutate()}
+              disabled={isLoading || isAnotherTaskRunning}
+              size="sm"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+              ) : (
+                <Play className="mr-2 h-3 w-3" />
+              )}
+              Start
+            </Button>
+          ) : (
+            <Button
+              onClick={() => stopMutation.mutate()}
+              disabled={isLoading}
+              variant="default"
+              size="sm"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+              ) : (
+                <Square className="mr-2 h-3 w-3" />
+              )}
+              Stop
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -638,45 +639,21 @@ export default function TaskDetailPage() {
         </Link>
       </div>
 
-      {/* Combined Time Tracking and Description Card */}
+      {/* Task Title and Content Card */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Timer className="h-5 w-5" />
-              <CardTitle>Time Tracking & Description</CardTitle>
-            </div>
-          </div>
+          <CardTitle>{task.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Timer Controls */}
-          <div>
-            <h3 className="mb-3 text-sm font-medium">Time Tracking</h3>
-            <TimerControls taskId={taskId} />
-          </div>
-
-          {/* Divider */}
-          <div className="border-t" />
-
-          {/* Description Editor */}
-          <div>
-            <h3 className="mb-3 text-sm font-medium">Description</h3>
-            <DescriptionEditor taskId={taskId} initialDescription={task.description} />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Task Details Accordion */}
-      <Card>
-        <CardContent className="p-0">
+          {/* Task Details Accordion */}
           <Accordion type="single" collapsible>
             <AccordionItem value="task-details" className="border-0">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <AccordionTrigger className="px-0 py-2 hover:no-underline">
                 <div className="flex items-center gap-2">
-                  <CardTitle className="text-lg">Task Details</CardTitle>
+                  <h3 className="text-sm font-medium">Task Details</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-0 pt-4">
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
@@ -815,6 +792,24 @@ export default function TaskDetailPage() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+
+          {/* Description Editor */}
+          <div>
+            <h3 className="mb-3 text-sm font-medium">Description</h3>
+            <DescriptionEditor taskId={taskId} initialDescription={task.description} />
+          </div>
+
+          {/* Divider */}
+          <div className="border-t" />
+
+          {/* Timer Controls - Compact Version */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <Timer className="h-4 w-4" />
+              <h3 className="text-sm font-medium">Time Tracking</h3>
+            </div>
+            <TimerControls taskId={taskId} />
+          </div>
         </CardContent>
       </Card>
 
