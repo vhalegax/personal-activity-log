@@ -1,16 +1,20 @@
-# daily-worklog
+# Personal Activity Log
 
-A modern starter template for Next.js applications with Shadcn/ui components and TailwindCSS v4.
+Personal Activity Log is a personal activity and time-tracking app built with Next.js, designed to record everything you do — from learning and work to hobbies — with flexible start–stop sessions and optional project organization.
 
 ## Features
 
 - ✅ Next.js 15 with App Router
-- ✅ Shadcn/ui components (40+ pre-built components)
+- ✅ Task & Activity Management
+- ✅ Time Tracking with Start/Stop Sessions
+- ✅ Project Organization
+- ✅ Supabase Authentication & Database
+- ✅ Shadcn/ui components
+- ✅ Dark/Light Mode Toggle
 - ✅ TailwindCSS v4
 - ✅ TypeScript
-- ✅ ESLint configuration
-- ✅ Organized project structure
-- ✅ Bun runtime support
+- ✅ Kanban Board View
+- ✅ Rich Text Description Editor
 
 ## Usage
 
@@ -54,8 +58,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "var(--color-primary)",
-        background: "var(--color-background)",
+        primary: 'var(--color-primary)',
+        background: 'var(--color-background)',
       },
     },
   },
@@ -77,8 +81,8 @@ npm install tailwindcss@next @tailwindcss/postcss@next
 2. Update your stylesheet and replace it with the code below:
 
 ```css
-@import "tailwindcss";
-@plugin "tailwindcss-animate";
+@import 'tailwindcss';
+@plugin 'tailwindcss-animate';
 
 @theme {
   --color-background: #fff;

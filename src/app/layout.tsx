@@ -18,8 +18,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Daily Worklog - Task Management',
-  description: 'A modern task management app with Supabase and TailwindCSS',
+  title: 'Personal Activity Log',
+  description:
+    'Personal Activity Log is a personal activity and time-tracking app built with Next.js, designed to record everything you do — from learning and work to hobbies — with flexible start–stop sessions and optional project organization.',
   icons: {
     icon: '/favicon.ico',
   },
