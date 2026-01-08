@@ -50,47 +50,47 @@ function truncateDescription(desc: string | null | undefined): string {
 function getStatusColor(status: string): string {
   switch (status.toLowerCase()) {
     case 'to do':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-secondary text-secondary-foreground';
     case 'in progress':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
     case 'review':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
     case 'done':
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
     case 'cancelled':
-      return 'bg-red-100 text-red-800';
+      return 'bg-destructive/10 text-destructive border-destructive/20';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-secondary text-secondary-foreground';
   }
 }
 
 function getTypeColor(type: string): string {
   switch (type.toLowerCase()) {
     case 'working':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800';
     case 'learning':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
     case 'other':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-secondary text-secondary-foreground';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-secondary text-secondary-foreground';
   }
 }
 
 function getColumnHeaderColor(status: string): string {
   switch (status.toLowerCase()) {
     case 'to do':
-      return 'bg-gray-200';
+      return 'bg-secondary/50 text-foreground';
     case 'in progress':
-      return 'bg-blue-200';
+      return 'bg-blue-500/20 text-blue-700 dark:text-blue-300';
     case 'review':
-      return 'bg-yellow-200';
+      return 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300';
     case 'done':
-      return 'bg-green-200';
+      return 'bg-green-500/20 text-green-700 dark:text-green-300';
     case 'cancelled':
-      return 'bg-red-200';
+      return 'bg-destructive/20 text-destructive';
     default:
-      return 'bg-gray-200';
+      return 'bg-secondary/50 text-foreground';
   }
 }
 
@@ -110,7 +110,7 @@ function SortableTaskCard({ task, isDragging }: { task: Task; isDragging?: boole
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <Link href={`/tasks/${task.id}`}>
-        <Card className="cursor-grab bg-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing">
+        <Card className="bg-card cursor-grab shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing">
           <CardHeader className="p-3">
             <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
             <CardDescription className="text-xs">
@@ -118,7 +118,9 @@ function SortableTaskCard({ task, isDragging }: { task: Task; isDragging?: boole
             </CardDescription>
           </CardHeader>
           <CardContent className="p-3 pt-0">
-            <Badge className={`text-xs ${getTypeColor(task.type)}`}>{task.type}</Badge>
+            <Badge variant="outline" className={`text-xs ${getTypeColor(task.type)}`}>
+              {task.type}
+            </Badge>
           </CardContent>
         </Card>
       </Link>
@@ -129,7 +131,7 @@ function SortableTaskCard({ task, isDragging }: { task: Task; isDragging?: boole
 // Drag overlay component (shows while dragging)
 function TaskDragOverlay({ task }: { task: Task }) {
   return (
-    <Card className="rotate-3 cursor-grabbing bg-white shadow-lg">
+    <Card className="bg-card rotate-3 cursor-grabbing shadow-lg">
       <CardHeader className="p-3">
         <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
         <CardDescription className="text-xs">
@@ -137,7 +139,9 @@ function TaskDragOverlay({ task }: { task: Task }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-3 pt-0">
-        <Badge className={`text-xs ${getTypeColor(task.type)}`}>{task.type}</Badge>
+        <Badge variant="outline" className={`text-xs ${getTypeColor(task.type)}`}>
+          {task.type}
+        </Badge>
       </CardContent>
     </Card>
   );
@@ -159,7 +163,7 @@ function KanbanColumn({
   });
 
   return (
-    <div className="flex min-w-[280px] flex-col rounded-lg bg-gray-50">
+    <div className="bg-muted/30 flex min-w-[280px] flex-col rounded-lg">
       <div className={`rounded-t-lg p-3 ${getColumnHeaderColor(status)}`}>
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">{status}</h3>
@@ -170,7 +174,7 @@ function KanbanColumn({
       </div>
       <div
         ref={setNodeRef}
-        className={`min-h-[200px] flex-1 space-y-2 p-2 transition-colors ${isOver ? 'bg-blue-50' : ''}`}
+        className={`min-h-[200px] flex-1 space-y-2 p-2 transition-colors ${isOver ? 'bg-primary/5' : ''}`}
       >
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
@@ -178,7 +182,7 @@ function KanbanColumn({
           ))}
         </SortableContext>
         {tasks.length === 0 && (
-          <div className="py-8 text-center text-sm text-gray-400">Drop tasks here</div>
+          <div className="text-muted-foreground py-8 text-center text-sm">Drop tasks here</div>
         )}
       </div>
     </div>

@@ -500,26 +500,19 @@ export default function TasksPage() {
 
       {/* Filters and Search */}
       <div className="flex gap-4">
-        <div className="flex flex-1 gap-2">
-          <div className="relative flex-1">
-            <Search className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-            <Input
-              placeholder="Search by title, description, PIC, requester, project..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSearch();
-                }
-              }}
-              className="pl-10"
-            />
-          </div>
-          <Button onClick={handleSearch}>
-            <Search className="mr-2 h-4 w-4" />
-            Search
-          </Button>
-        </div>
+        {/* Project Filter */}
+        <Combobox
+          options={[
+            { value: 'all', label: 'All Projects' },
+            ...projects.map((p) => ({ value: p.id, label: p.name })),
+          ]}
+          value={projectFilter}
+          onValueChange={(val) => setProjectFilter(val || 'all')}
+          placeholder="Filter by Project"
+          searchPlaceholder="Search projects..."
+          emptyText="No projects found."
+          className="w-[200px]"
+        />
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px]">
@@ -547,19 +540,26 @@ export default function TasksPage() {
           </SelectContent>
         </Select>
 
-        {/* Project Filter */}
-        <Combobox
-          options={[
-            { value: 'all', label: 'All Projects' },
-            ...projects.map((p) => ({ value: p.id, label: p.name })),
-          ]}
-          value={projectFilter}
-          onValueChange={(val) => setProjectFilter(val || 'all')}
-          placeholder="Filter by Project"
-          searchPlaceholder="Search projects..."
-          emptyText="No projects found."
-          className="w-[200px]"
-        />
+        <div className="flex flex-1 gap-2">
+          <div className="relative flex-1">
+            <Search className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+            <Input
+              placeholder="Search by title, description, PIC, requester, project..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
+              className="pl-10"
+            />
+          </div>
+          <Button onClick={handleSearch}>
+            <Search className="mr-2 h-4 w-4" />
+            Search
+          </Button>
+        </div>
       </div>
 
       {/* Loading State */}
