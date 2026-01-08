@@ -49,7 +49,6 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
     "@supabase/supabase-js": "^2.89.0",
-    "@tailwindcss/postcss": "next",
     "@tanstack/react-query": "^5.90.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -75,6 +74,7 @@
   },
   "devDependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
@@ -87,11 +87,10 @@
     "eslint-config-next": "15.0.4",
     "jsdom": "^27.4.0",
     "msw": "^2.12.7",
-    "postcss": "^8",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "supertest": "^7.2.2",
-    "tailwindcss": "next",
+    "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.16"
   }
