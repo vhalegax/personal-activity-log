@@ -1,6 +1,12 @@
 'use client';
 
 import '@/assets/styles/quill-custom.css';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,6 +29,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase-client';
 import {
@@ -135,54 +149,49 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
   }
 
   return (
-    <div className="space-y-2">
-      {timeLogs.map((log) => {
-        // Calculate duration in code from start_at and end_at
-        let calculatedDuration = log.duration;
-        if (log.start_at && log.end_at) {
-          const startTime = new Date(log.start_at).getTime();
-          const endTime = new Date(log.end_at).getTime();
-          calculatedDuration = Math.floor((endTime - startTime) / 1000);
-        } else if (log.start_at && !log.end_at) {
-          // Still running - calculate from start to now
-          const startTime = new Date(log.start_at).getTime();
-          const now = new Date().getTime();
-          calculatedDuration = Math.floor((now - startTime) / 1000);
-        }
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Start Time</TableHead>
+          <TableHead>End Time</TableHead>
+          <TableHead>Duration</TableHead>
+          <TableHead className="text-center">Status</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {timeLogs.map((log) => {
+          // Calculate duration in code from start_at and end_at
+          let calculatedDuration = log.duration;
+          if (log.start_at && log.end_at) {
+            const startTime = new Date(log.start_at).getTime();
+            const endTime = new Date(log.end_at).getTime();
+            calculatedDuration = Math.floor((endTime - startTime) / 1000);
+          } else if (log.start_at && !log.end_at) {
+            // Still running - calculate from start to now
+            const startTime = new Date(log.start_at).getTime();
+            const now = new Date().getTime();
+            calculatedDuration = Math.floor((now - startTime) / 1000);
+          }
 
-        return (
-          <Card key={log.id}>
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="text-muted-foreground h-4 w-4" />
-                    <span className="font-medium">Start:</span>
-                    <span>{formatDateTime(log.start_at)}</span>
-                  </div>
-                  {log.end_at && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Square className="text-muted-foreground h-4 w-4" />
-                      <span className="font-medium">End:</span>
-                      <span>{formatDateTime(log.end_at)}</span>
-                    </div>
-                  )}
-                  {!log.end_at && (
-                    <Badge variant="outline" className="bg-green-50 text-green-700">
-                      Active
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold">{formatDuration(calculatedDuration)}</div>
-                  <p className="text-muted-foreground text-xs">Duration</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
+          return (
+            <TableRow key={log.id}>
+              <TableCell>{formatDateTime(log.start_at)}</TableCell>
+              <TableCell>{log.end_at ? formatDateTime(log.end_at) : '-'}</TableCell>
+              <TableCell className="font-mono font-semibold">
+                {formatDuration(calculatedDuration)}
+              </TableCell>
+              <TableCell className="text-center">
+                {!log.end_at && (
+                  <Badge variant="outline" className="bg-green-50 text-green-700">
+                    Active
+                  </Badge>
+                )}
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -629,172 +638,183 @@ export default function TaskDetailPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Task Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Task Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex-1">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Title *</FormLabel>
-                        <FormControl>
-                          <Input {...field} value={field.value ?? ''} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Type</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value || undefined}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {TaskType.options.map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Status</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value || undefined}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {TaskStatus.options.map((status) => (
-                                <SelectItem key={status} value={status}>
-                                  {status}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="pic"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>PIC</FormLabel>
-                          <FormControl>
-                            <Input {...field} value={field.value || ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="requester"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Requester</FormLabel>
-                          <FormControl>
-                            <Input {...field} value={field.value || ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="project_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Project</FormLabel>
-                        <FormControl>
-                          <Combobox
-                            options={projects.map((p) => ({ value: p.id, label: p.name }))}
-                            value={field.value || ''}
-                            onValueChange={field.onChange}
-                            placeholder="Select project..."
-                            searchPlaceholder="Search projects..."
-                            emptyText="No projects found."
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.formState.errors.root && (
-                    <p className="text-destructive text-sm font-medium">
-                      {form.formState.errors.root.message}
-                    </p>
-                  )}
-
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={updateMutation.isPending}>
-                      {updateMutation.isPending && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      Save Changes
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Timer Section */}
-        <Card>
-          <CardHeader>
+      {/* Combined Time Tracking and Description Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Timer className="h-5 w-5" />
-              <CardTitle>Time Tracking</CardTitle>
+              <CardTitle>Time Tracking & Description</CardTitle>
             </div>
-            <CardDescription>Track time spent on this task</CardDescription>
-          </CardHeader>
-          <CardContent>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Timer Controls */}
+          <div>
+            <h3 className="mb-3 text-sm font-medium">Time Tracking</h3>
             <TimerControls taskId={taskId} />
-          </CardContent>
-        </Card>
-      </div>
+          </div>
 
-      {/* Description Section - Auto-saves */}
+          {/* Divider */}
+          <div className="border-t" />
+
+          {/* Description Editor */}
+          <div>
+            <h3 className="mb-3 text-sm font-medium">Description</h3>
+            <DescriptionEditor taskId={taskId} initialDescription={task.description} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Task Details Accordion */}
       <Card>
-        <CardContent className="p-6">
-          <DescriptionEditor taskId={taskId} initialDescription={task.description} />
+        <CardContent className="p-0">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="task-details" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-lg">Task Details</CardTitle>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Title *</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value ?? ''} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Type</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {TaskType.options.map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Status</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {TaskStatus.options.map((status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {status}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="pic"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>PIC</FormLabel>
+                            <FormControl>
+                              <Input {...field} value={field.value || ''} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="requester"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Requester</FormLabel>
+                            <FormControl>
+                              <Input {...field} value={field.value || ''} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="project_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Project</FormLabel>
+                          <FormControl>
+                            <Combobox
+                              options={projects.map((p) => ({ value: p.id, label: p.name }))}
+                              value={field.value || ''}
+                              onValueChange={field.onChange}
+                              placeholder="Select project..."
+                              searchPlaceholder="Search projects..."
+                              emptyText="No projects found."
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {form.formState.errors.root && (
+                      <p className="text-destructive text-sm font-medium">
+                        {form.formState.errors.root.message}
+                      </p>
+                    )}
+
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={updateMutation.isPending}>
+                        {updateMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Save Changes
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
 
