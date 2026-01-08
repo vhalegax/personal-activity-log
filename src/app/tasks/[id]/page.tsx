@@ -1,6 +1,7 @@
 'use client';
 
 import '@/assets/styles/quill-custom.css';
+import { ThemeToggle } from '@/components/theme-toggle';
 import {
   Accordion,
   AccordionContent,
@@ -107,6 +108,38 @@ function formatDateTime(dateString: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+// Get status badge color
+function getStatusColor(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'to do':
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+    case 'in progress':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+    case 'review':
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100';
+    case 'done':
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
+    case 'cancelled':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100';
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+  }
+}
+
+// Get type badge color
+function getTypeColor(type: string): string {
+  switch (type.toLowerCase()) {
+    case 'working':
+      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100';
+    case 'learning':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+    case 'other':
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+  }
 }
 
 function TimeLogHistory({ taskId }: { taskId: string }) {
@@ -630,19 +663,33 @@ export default function TaskDetailPage() {
   return (
     <div className="container mx-auto space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center">
+      <div className="flex items-center justify-between">
         <Link href="/tasks">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Tasks
           </Button>
         </Link>
+        <ThemeToggle />
       </div>
 
       {/* Task Title and Content Card */}
       <Card>
         <CardHeader>
-          <CardTitle>{task.title}</CardTitle>
+          <div className="space-y-2">
+            <CardTitle className="text-2xl">{task.title}</CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className={getTypeColor(task.type)}>
+                {task.type}
+              </Badge>
+              <Badge variant="secondary" className={getStatusColor(task.status)}>
+                {task.status}
+              </Badge>
+              <span className="text-muted-foreground text-sm">
+                • Created {new Date(task.created_at).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Task Details Accordion */}

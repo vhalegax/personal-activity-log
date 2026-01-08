@@ -1,6 +1,7 @@
 'use client';
 
 import { KanbanBoard } from '@/components/KanbanBoard';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -67,11 +68,21 @@ type ActiveTimeLog = {
   };
 };
 
-// Truncate description to 30 characters
-function truncateDescription(desc: string | null | undefined): string {
+// Strip HTML tags from description for display
+function stripHtmlTags(html: string | null | undefined): string {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
+}
+
+// Truncate description to specified length
+function truncateDescription(desc: string | null | undefined, maxLength: number = 150): string {
   if (!desc) return '';
-  if (desc.length <= 30) return desc;
-  return desc.substring(0, 30) + '...';
+  const stripped = stripHtmlTags(desc);
+  if (stripped.length <= maxLength) return stripped;
+  return stripped.substring(0, maxLength) + '...';
 }
 
 function CreateTaskDialog() {
@@ -414,30 +425,30 @@ export default function TasksPage() {
   const getStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'to do':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
       case 'in progress':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
       case 'review':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100';
       case 'done':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
     }
   };
 
   const getTypeColor = (type: string): string => {
     switch (type.toLowerCase()) {
       case 'working':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100';
       case 'learning':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
       case 'other':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
     }
   };
 
@@ -466,6 +477,7 @@ export default function TasksPage() {
               <LayoutList className="h-4 w-4" />
             </Button>
           </div>
+          <ThemeToggle />
           <CreateTaskDialog />
         </div>
       </div>
@@ -591,18 +603,26 @@ export default function TasksPage() {
             <div className="space-y-4">
               {tasks.map((task) => (
                 <Link key={task.id} href={`/tasks/${task.id}`}>
-                  <Card className="cursor-pointer transition-shadow hover:shadow-md">
+                  <Card className="hover:border-primary/50 cursor-pointer transition-all hover:shadow-lg">
                     <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-xl">{task.title}</CardTitle>
-                          <CardDescription className="mt-1">
-                            {truncateDescription(task.description)}
-                          </CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge className={getTypeColor(task.type)}>{task.type}</Badge>
-                          <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <CardTitle className="text-xl">{task.title}</CardTitle>
+                          </div>
+                          {task.description && (
+                            <CardDescription className="text-sm leading-relaxed">
+                              {truncateDescription(task.description, 200)}
+                            </CardDescription>
+                          )}
+                          <div className="flex gap-2 pt-1">
+                            <Badge className={getTypeColor(task.type)} variant="secondary">
+                              {task.type}
+                            </Badge>
+                            <Badge className={getStatusColor(task.status)} variant="secondary">
+                              {task.status}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     </CardHeader>
