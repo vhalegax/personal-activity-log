@@ -693,12 +693,12 @@ export default function TaskDetailPage() {
           {/* Task Details Accordion */}
           <Accordion type="single" collapsible>
             <AccordionItem value="task-details" className="border-0">
-              <AccordionTrigger className="px-0 py-2 hover:no-underline">
+              <AccordionTrigger className="p-0">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-medium">Task Details</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-0 pt-4">
+              <AccordionContent className="p-0 pt-4">
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
@@ -843,7 +843,7 @@ export default function TaskDetailPage() {
 
           {/* Description Editor */}
           <div>
-            <h3 className="mb-3 text-sm font-medium">Description</h3>
+            <h3 className="mb-4 text-sm font-medium">Description</h3>
             <DescriptionEditor taskId={taskId} initialDescription={task.description} />
           </div>
         </CardContent>
