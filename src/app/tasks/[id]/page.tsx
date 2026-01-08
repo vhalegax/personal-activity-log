@@ -487,8 +487,10 @@ function TimerControls({ taskId }: { taskId: string }) {
   return (
     <div className="flex gap-2">
       {isAnotherTaskRunning && (
-        <Alert className="border-yellow-500/20 bg-yellow-500/10">
-          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+        <Alert className="flex items-center space-x-2 border-yellow-500/20 bg-yellow-500/10">
+          <div>
+            <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+          </div>
           <AlertDescription className="text-yellow-800 dark:text-yellow-200">
             Another task is already being tracked. Please stop it first.
           </AlertDescription>

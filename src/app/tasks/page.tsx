@@ -484,8 +484,10 @@ export default function TasksPage() {
 
       {/* Active Timer Alert */}
       {activeTimer && (
-        <Alert className="border-green-500/20 bg-green-500/10">
-          <Timer className="h-4 w-4 text-green-600 dark:text-green-500" />
+        <Alert className="flex items-center border-green-500/20 bg-green-500/10">
+          <div>
+            <Timer className="h-4 w-4 *:text-green-600 dark:text-green-500" />
+          </div>
           <AlertDescription className="ml-2 text-green-800 dark:text-green-200">
             <span className="font-medium">Timer is running</span> for task:{' '}
             <Link
