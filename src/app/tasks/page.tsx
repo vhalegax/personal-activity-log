@@ -425,30 +425,30 @@ export default function TasksPage() {
   const getStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'to do':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+        return 'bg-secondary text-secondary-foreground';
       case 'in progress':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+        return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
       case 'review':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100';
+        return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
       case 'done':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
+        return 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
       case 'cancelled':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100';
+        return 'bg-destructive/10 text-destructive border-destructive/20';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+        return 'bg-secondary text-secondary-foreground';
     }
   };
 
   const getTypeColor = (type: string): string => {
     switch (type.toLowerCase()) {
       case 'working':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100';
+        return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800';
       case 'learning':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+        return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
       case 'other':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+        return 'bg-secondary text-secondary-foreground';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+        return 'bg-secondary text-secondary-foreground';
     }
   };
 
@@ -484,13 +484,13 @@ export default function TasksPage() {
 
       {/* Active Timer Alert */}
       {activeTimer && (
-        <Alert className="border-green-200 bg-green-50">
-          <Timer className="h-4 w-4 text-green-600" />
-          <AlertDescription className="ml-2">
+        <Alert className="border-green-500/20 bg-green-500/10">
+          <Timer className="h-4 w-4 text-green-600 dark:text-green-500" />
+          <AlertDescription className="ml-2 text-green-800 dark:text-green-200">
             <span className="font-medium">Timer is running</span> for task:{' '}
             <Link
               href={`/tasks/${activeTimer.task_id}`}
-              className="font-semibold text-green-700 hover:underline"
+              className="font-semibold text-green-700 hover:underline dark:text-green-400"
             >
               {tasks.find((t) => t.id === activeTimer.task_id)?.title || 'Loading...'}
             </Link>

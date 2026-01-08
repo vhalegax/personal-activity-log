@@ -114,17 +114,17 @@ function formatDateTime(dateString: string): string {
 function getStatusColor(status: string): string {
   switch (status.toLowerCase()) {
     case 'to do':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+      return 'bg-secondary text-secondary-foreground';
     case 'in progress':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+      return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
     case 'review':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100';
+      return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
     case 'done':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
+      return 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
     case 'cancelled':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100';
+      return 'bg-destructive/10 text-destructive border-destructive/20';
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+      return 'bg-secondary text-secondary-foreground';
   }
 }
 
@@ -132,13 +132,13 @@ function getStatusColor(status: string): string {
 function getTypeColor(type: string): string {
   switch (type.toLowerCase()) {
     case 'working':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100';
+      return 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800';
     case 'learning':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+      return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
     case 'other':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+      return 'bg-secondary text-secondary-foreground';
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100';
+      return 'bg-secondary text-secondary-foreground';
   }
 }
 
@@ -215,7 +215,10 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
               </TableCell>
               <TableCell className="text-center">
                 {!log.end_at && (
-                  <Badge variant="outline" className="bg-green-50 text-green-700">
+                  <Badge
+                    variant="outline"
+                    className="border-green-200 bg-green-500/10 text-green-700 dark:border-green-800 dark:text-green-400"
+                  >
                     Active
                   </Badge>
                 )}
@@ -482,49 +485,44 @@ function TimerControls({ taskId }: { taskId: string }) {
   const isLoading = startMutation.isPending || stopMutation.isPending;
 
   return (
-    <div className="space-y-3">
+    <div className="flex gap-2">
       {isAnotherTaskRunning && (
-        <Alert className="border-yellow-200 bg-yellow-50">
-          <AlertCircle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800">
+        <Alert className="border-yellow-500/20 bg-yellow-500/10">
+          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
             Another task is already being tracked. Please stop it first.
           </AlertDescription>
         </Alert>
       )}
 
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-muted-foreground text-sm">Track time spent on this task</p>
-        <div className="flex gap-2">
-          {!isActive ? (
-            <Button
-              onClick={() => startMutation.mutate()}
-              disabled={isLoading || isAnotherTaskRunning}
-              size="sm"
-            >
-              {isLoading ? (
-                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-              ) : (
-                <Play className="mr-2 h-3 w-3" />
-              )}
-              Start
-            </Button>
+      {!isActive ? (
+        <Button
+          onClick={() => startMutation.mutate()}
+          disabled={isLoading || isAnotherTaskRunning}
+          size="default"
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <Button
-              onClick={() => stopMutation.mutate()}
-              disabled={isLoading}
-              variant="default"
-              size="sm"
-            >
-              {isLoading ? (
-                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-              ) : (
-                <Square className="mr-2 h-3 w-3" />
-              )}
-              Stop
-            </Button>
+            <Play className="mr-2 h-4 w-4" />
           )}
-        </div>
-      </div>
+          Start Timer
+        </Button>
+      ) : (
+        <Button
+          onClick={() => stopMutation.mutate()}
+          disabled={isLoading}
+          variant="destructive"
+          size="default"
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Square className="mr-2 h-4 w-4" />
+          )}
+          Stop Timer
+        </Button>
+      )}
     </div>
   );
 }
@@ -661,7 +659,7 @@ export default function TaskDetailPage() {
   }
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
+    <div className="container mx-auto space-y-6 p-6 pb-32">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Link href="/tasks">
@@ -679,10 +677,10 @@ export default function TaskDetailPage() {
           <div className="space-y-2">
             <CardTitle className="text-2xl">{task.title}</CardTitle>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className={getTypeColor(task.type)}>
+              <Badge variant="outline" className={getTypeColor(task.type)}>
                 {task.type}
               </Badge>
-              <Badge variant="secondary" className={getStatusColor(task.status)}>
+              <Badge variant="outline" className={getStatusColor(task.status)}>
                 {task.status}
               </Badge>
               <span className="text-muted-foreground text-sm">
@@ -840,22 +838,13 @@ export default function TaskDetailPage() {
             </AccordionItem>
           </Accordion>
 
+          {/* Divider */}
+          <div className="border-t" />
+
           {/* Description Editor */}
           <div>
             <h3 className="mb-3 text-sm font-medium">Description</h3>
             <DescriptionEditor taskId={taskId} initialDescription={task.description} />
-          </div>
-
-          {/* Divider */}
-          <div className="border-t" />
-
-          {/* Timer Controls - Compact Version */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Timer className="h-4 w-4" />
-              <h3 className="text-sm font-medium">Time Tracking</h3>
-            </div>
-            <TimerControls taskId={taskId} />
           </div>
         </CardContent>
       </Card>
@@ -870,6 +859,25 @@ export default function TaskDetailPage() {
           <TimeLogHistory taskId={taskId} />
         </CardContent>
       </Card>
+
+      {/* Fixed Bottom Time Tracking */}
+      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed right-0 bottom-0 left-0 border-t backdrop-blur">
+        <div className="container mx-auto p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Timer className="text-muted-foreground h-4 w-4" />
+                <h3 className="text-sm font-medium">Time Tracking</h3>
+              </div>
+              <p className="text-muted-foreground mt-1 text-xs">
+                Track time spent on:{' '}
+                <span className="text-foreground font-medium">{task.title}</span>
+              </p>
+            </div>
+            <TimerControls taskId={taskId} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
