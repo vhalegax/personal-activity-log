@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/lib/supabase-client';
 import { createTaskSchema, TaskType, type CreateTaskInput } from '@/schemas/task-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -83,6 +84,14 @@ function truncateDescription(desc: string | null | undefined, maxLength: number 
   const stripped = stripHtmlTags(desc);
   if (stripped.length <= maxLength) return stripped;
   return stripped.substring(0, maxLength) + '...';
+}
+
+// Get greeting based on time of day
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 18) return 'Good Afternoon';
+  return 'Good Evening';
 }
 
 function CreateTaskDialog() {
@@ -335,6 +344,7 @@ function CreateTaskDialog() {
 
 export default function TasksPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -456,7 +466,9 @@ export default function TasksPage() {
     <div className="container mx-auto space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
+          <h1 className="text-3xl font-bold">
+            {getGreeting()}, {user?.email} 👋
+          </h1>
           <p className="text-muted-foreground">Manage and track your tasks</p>
         </div>
         <div className="flex items-center gap-2">
