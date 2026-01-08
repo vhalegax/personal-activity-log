@@ -1,16 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-if (process.env.NODE_ENV !== 'development') {
-  throw new Error('Debug endpoint only available in development');
-}
-
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || '',
 );
 
 export async function GET(req: NextRequest) {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json(
+      { error: 'Debug endpoint only available in development' },
+      { status: 403 },
+    );
+  }
+
   try {
     const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
     if (authError) return NextResponse.json({ error: authError.message }, { status: 500 });

@@ -1,20 +1,18 @@
-import * as msw from 'msw';
-
-const { rest } = msw;
+import { http, HttpResponse } from 'msw';
 
 export const handlers = [
-  rest.post('/api/auth/signup', async (req, res, ctx) => {
-    const body = await req.json();
-    const email = body?.email;
+  http.post('/api/auth/signup', async ({ request }) => {
+    const body = await request.json();
+    const email = (body as any)?.email;
 
     if (!email) {
-      return res(ctx.status(400), ctx.json({ error: 'email required' }));
+      return HttpResponse.json({ error: 'email required' }, { status: 400 });
     }
 
     if (email === 'exists@example.com') {
-      return res(ctx.status(400), ctx.json({ error: 'Email already registered' }));
+      return HttpResponse.json({ error: 'Email already registered' }, { status: 400 });
     }
 
-    return res(ctx.status(201), ctx.json({ success: true }));
+    return HttpResponse.json({ success: true }, { status: 201 });
   }),
 ];

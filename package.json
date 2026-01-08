@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:ai": "prettier --write \"src/app/api/**/*.{ts,tsx,js,jsx}\" \"src/components/**/*.{ts,tsx,js,jsx}\"",
     "test": "bun test",
+    "test:vitest": "vitest",
     "test:run": "bunx vitest run",
     "test:run-verbose": "bunx vitest run --reporter verbose",
     "test:watch": "bunx vitest --watch",
@@ -73,6 +74,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",

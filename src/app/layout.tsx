@@ -3,7 +3,7 @@ import Providers from '@/components/Providers';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/use-auth';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 
 const geistSans = localFont({
@@ -22,8 +22,21 @@ export const metadata: Metadata = {
   description:
     'Personal Activity Log is a personal activity and time-tracking app built with Next.js, designed to record everything you do — from learning and work to hobbies — with flexible start–stop sessions and optional project organization.',
   icons: {
-    icon: '/favicon.ico',
+    icon: 'icon/favicon.ico',
   },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Activity Log',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#000000',
 };
 
 export default function RootLayout({

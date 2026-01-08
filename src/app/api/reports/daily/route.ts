@@ -45,7 +45,7 @@ export async function GET(req: Request) {
   const customStart = url.searchParams.get('start');
   const customEnd = url.searchParams.get('end');
 
-  const { start, end } = getDateRange(range, customStart, customEnd);
+  const { start, end } = getDateRange(range, customStart ?? undefined, customEnd ?? undefined);
 
   const logs = db.timeLogs.filter((l) => {
     const s = new Date(l.start_at).getTime();
