@@ -49,7 +49,7 @@ Implementasi lengkap Task Management dengan Supabase untuk daily-worklog.
 ✅ Form validation (Zod)
 ✅ Field validation:
    - Title: required, min 3, max 255 chars
-   - Description: optional, max 5000 chars
+   - Description: optional, max 50000 chars
    - Project: optional UUID
    - Requester: optional text
    - PIC: optional text

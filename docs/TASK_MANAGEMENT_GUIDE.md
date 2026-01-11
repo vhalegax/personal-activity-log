@@ -48,7 +48,7 @@ SUPABASE_SETUP.md                   # Setup guide lengkap
 | Field | Type | Required | Rules |
 |-------|------|----------|-------|
 | Title | Text | ✅ | Min 3, Max 255 chars |
-| Description | Textarea | ❌ | Max 5000 chars |
+| Description | Textarea | ❌ | Max 50000 chars |
 | Project | Select | ❌ | UUID format |
 | Requester | Text | ❌ | Max 255 chars |
 | PIC | Text | ❌ | Max 255 chars |
@@ -189,7 +189,7 @@ POST /api/tasks
 Request Body:
 {
   "title": "string (required, 3-255 chars)",
-  "description": "string (optional, max 5000 chars)",
+  "description": "string (optional, max 50000 chars)",
   "project_id": "uuid (optional)",
   "requester": "string (optional)",
   "pic": "string (optional)",
@@ -304,7 +304,7 @@ function MyComponent() {
 // Create Task
 const createTaskSchema = z.object({
   title: z.string().min(3).max(255),
-  description: z.string().max(5000).optional().nullable(),
+  description: z.string().max(50000).optional().nullable(),
   project_id: z.string().uuid().optional().nullable(),
   requester: z.string().max(255).optional().nullable(),
   pic: z.string().max(255).optional().nullable(),

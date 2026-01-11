@@ -16,7 +16,7 @@ export const createTaskSchema = z.object({
   description: z
     .string()
     .trim()
-    .max(5000, { message: 'Description must be less than 5000 characters' })
+    .max(50000, { message: 'Description must be less than 50000 characters' })
     .optional()
     .nullable(),
   type: TaskType.default('Working'),
