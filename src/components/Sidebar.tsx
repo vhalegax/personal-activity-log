@@ -1,6 +1,8 @@
 'use client';
 
+import { Separator } from './ui';
 import { cn } from '@/lib/utils';
+import { isDisabled } from '@testing-library/user-event/dist/cjs/utils/index.js';
 import { LayoutDashboard, CheckSquare, BarChart3, FolderKanban } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -20,6 +22,7 @@ const menuItems = [
     title: 'Reports',
     href: '/reports',
     icon: BarChart3,
+    isDisabled: true,
   },
   {
     title: 'Projects',
@@ -43,27 +46,31 @@ export function Sidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
+        <nav className="flex-1 space-y-4 px-3 py-4">
+          <div className="space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                )}
-              >
-                <Icon className="h-5 w-5" />
-                {item.title}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.isDisabled ? '#' : item.href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.title}
+                </Link>
+              );
+            })}
+          </div>
+
+          <Separator />
         </nav>
 
         {/* Footer */}
