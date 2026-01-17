@@ -1,7 +1,6 @@
 'use client';
 
 import { KanbanBoard } from '@/components/KanbanBoard';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -489,7 +488,6 @@ export default function TasksPage() {
               <LayoutList className="h-4 w-4" />
             </Button>
           </div>
-          <ThemeToggle />
           <CreateTaskDialog />
         </div>
       </div>

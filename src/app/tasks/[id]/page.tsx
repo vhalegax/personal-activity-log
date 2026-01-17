@@ -1,7 +1,6 @@
 'use client';
 
 import '@/assets/styles/quill-custom.css';
-import { ThemeToggle } from '@/components/theme-toggle';
 import {
   Accordion,
   AccordionContent,
@@ -670,7 +669,6 @@ export default function TaskDetailPage() {
             Back to Tasks
           </Button>
         </Link>
-        <ThemeToggle />
       </div>
 
       {/* Task Title and Content Card */}
@@ -863,8 +861,9 @@ export default function TaskDetailPage() {
       </Card>
 
       {/* Fixed Bottom Time Tracking */}
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed right-0 bottom-0 left-0 border-t backdrop-blur">
-        <div className="p-4">
+      <div className="h-10"></div>
+      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed right-0 bottom-0 left-64 border-t backdrop-blur">
+        <div className="p-4 px-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2">
