@@ -108,7 +108,7 @@ export default function ReportsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Reports</h1>
             <p className="text-sm text-gray-600">Track your time and productivity</p>
@@ -121,9 +121,9 @@ export default function ReportsPage() {
       </div>
 
       {/* Main content */}
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="">
         {/* Date Range Selector */}
-        <div className="mb-8 rounded-lg bg-white p-6 shadow">
+        <div className="mb-8 rounded-lg bg-white shadow">
           <h2 className="mb-4 text-xl font-bold">Select Date Range</h2>
 
           <div className="mb-4 flex flex-wrap gap-2">

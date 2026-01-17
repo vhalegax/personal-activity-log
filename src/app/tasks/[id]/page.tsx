@@ -639,7 +639,7 @@ export default function TaskDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto space-y-6 p-6">
+      <div className="space-y-6">
         <Skeleton className="h-10 w-[200px]" />
         <Skeleton className="h-[400px] w-full" />
       </div>
@@ -648,7 +648,7 @@ export default function TaskDetailPage() {
 
   if (error || !task) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="">
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <p className="text-destructive">
@@ -661,7 +661,7 @@ export default function TaskDetailPage() {
   }
 
   return (
-    <div className="container mx-auto space-y-6 p-6 pb-32">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Link href="/tasks">
@@ -864,7 +864,7 @@ export default function TaskDetailPage() {
 
       {/* Fixed Bottom Time Tracking */}
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed right-0 bottom-0 left-0 border-t backdrop-blur">
-        <div className="container mx-auto p-4">
+        <div className="p-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2">
