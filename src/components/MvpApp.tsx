@@ -286,7 +286,7 @@ export default function MvpApp() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between px-4 py-4 md:px-6 lg:px-8">
           <div>
             <h1 className="text-2xl font-bold">Task Tracker</h1>
             <p className="text-sm text-gray-600">
@@ -309,14 +309,14 @@ export default function MvpApp() {
       </div>
 
       {/* Main content */}
-      <div className="px-4 py-8 sm:px-6 lg:px-8">
+      <div className="px-4 py-8 md:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8">
           {/* New Task Form */}
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="mb-4 text-xl font-bold">Create New Task</h2>
 
             <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium">Title *</label>
                   <Input
@@ -351,7 +351,7 @@ export default function MvpApp() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium">Status</label>
                   <select
@@ -391,7 +391,7 @@ export default function MvpApp() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium">Requester</label>
                   <Input
@@ -466,7 +466,7 @@ export default function MvpApp() {
                 No projects yet. Create one above to get started!
               </div>
             ) : (
-              <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 p-6 md:grid-cols-2 lg:grid-cols-3">
                 {projects.map((project) => (
                   <div
                     key={project.id}
@@ -483,7 +483,7 @@ export default function MvpApp() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-lg bg-white p-6 shadow">
               <p className="text-sm font-medium text-gray-600">Total Tasks</p>
               <p className="mt-2 text-3xl font-bold text-gray-900">{tasks.length}</p>

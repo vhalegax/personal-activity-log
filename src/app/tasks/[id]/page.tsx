@@ -862,7 +862,7 @@ export default function TaskDetailPage() {
 
       {/* Fixed Bottom Time Tracking */}
       <div className="h-10"></div>
-      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed right-0 bottom-0 left-64 border-t backdrop-blur">
+      <div className="bg-background/95 supports-[backdrop-filter]:bg-background/80 fixed right-0 bottom-0 border-t backdrop-blur md:left-64">
         <div className="p-4 px-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">

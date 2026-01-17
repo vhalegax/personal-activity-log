@@ -1,7 +1,6 @@
 import '../assets/styles/globals.css';
-import { Navbar } from '@/components/Navbar';
+import { LayoutWrapper } from '@/components/LayoutWrapper';
 import Providers from '@/components/Providers';
-import { Sidebar } from '@/components/Sidebar';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/use-auth';
@@ -57,9 +56,7 @@ export default function RootLayout({
         >
           <Providers>
             <AuthProvider>
-              <Sidebar />
-              <Navbar />
-              <main className="bg-background mt-16 ml-64 min-h-screen p-6">{children}</main>
+              <LayoutWrapper>{children}</LayoutWrapper>
               <Toaster />
             </AuthProvider>
           </Providers>

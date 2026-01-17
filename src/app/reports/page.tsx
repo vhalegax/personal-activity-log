@@ -149,7 +149,7 @@ export default function ReportsPage() {
 
           {range === 'custom' && (
             <div className="space-y-4 border-t border-gray-200 pt-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium">Start Date</label>
                   <input
@@ -179,7 +179,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="rounded-lg bg-white p-6 shadow">
             <h3 className="mb-2 text-sm font-medium text-gray-600">Total Hours</h3>
             <p className="text-3xl font-bold text-blue-600">{totalHours.toFixed(2)}</p>

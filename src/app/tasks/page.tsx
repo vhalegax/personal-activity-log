@@ -178,7 +178,7 @@ function CreateTaskDialog() {
           Create Task
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="md:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
           <DialogDescription>Add a new task to track your work</DialogDescription>
@@ -463,7 +463,7 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
         <div>
           <h1 className="text-3xl font-bold">
             {getGreeting()}, {user?.email} 👋
@@ -511,7 +511,7 @@ export default function TasksPage() {
       )}
 
       {/* Filters and Search */}
-      <div className="flex gap-4">
+      <div className="flex max-w-screen gap-4 overflow-auto">
         {/* Project Filter */}
         <Combobox
           options={[
@@ -523,11 +523,11 @@ export default function TasksPage() {
           placeholder="Filter by Project"
           searchPlaceholder="Search projects..."
           emptyText="No projects found."
-          className="w-[200px]"
+          className="min-w-[200px]"
         />
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="min-w-[180px]">
             <SelectValue placeholder="Filter by Status" />
           </SelectTrigger>
           <SelectContent>
@@ -541,7 +541,7 @@ export default function TasksPage() {
         </Select>
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="min-w-[180px]">
             <SelectValue placeholder="Filter by Type" />
           </SelectTrigger>
           <SelectContent>
@@ -553,7 +553,7 @@ export default function TasksPage() {
         </Select>
 
         <div className="flex flex-1 gap-2">
-          <div className="relative flex-1">
+          <div className="relative min-w-[180px] flex-1">
             <Search className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
             <Input
               placeholder="Search by title, description, PIC, requester, project..."
@@ -614,7 +614,7 @@ export default function TasksPage() {
           ) : (
             <div className="space-y-4">
               {tasks.map((task) => (
-                <Link key={task.id} href={`/tasks/${task.id}`}>
+                <Link key={task.id} href={`/tasks/${task.id}`} className="block">
                   <Card className="hover:border-primary/50 cursor-pointer transition-all hover:shadow-lg">
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4">
@@ -623,7 +623,7 @@ export default function TasksPage() {
                             <CardTitle className="text-xl">{task.title}</CardTitle>
                           </div>
                           {task.description && (
-                            <CardDescription className="text-sm leading-relaxed">
+                            <CardDescription className="max-w-[calc(100dvw-40px)] overflow-auto text-sm leading-relaxed">
                               {truncateDescription(task.description, 200)}
                             </CardDescription>
                           )}
