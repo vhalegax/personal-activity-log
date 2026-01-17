@@ -1,6 +1,7 @@
 'use client';
 
 import '@/assets/styles/quill-custom.css';
+import { EditTimeLogDialog } from '@/components/EditTimeLogDialog';
 import {
   Accordion,
   AccordionContent,
@@ -142,6 +143,11 @@ function getTypeColor(type: string): string {
 }
 
 function TimeLogHistory({ taskId }: { taskId: string }) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [editingLog, setEditingLog] = useState<TimeLog | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const { data: timeLogs = [], isLoading } = useQuery<TimeLog[]>({
     queryKey: ['time-logs', taskId],
     queryFn: async () => {
@@ -162,6 +168,46 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
     },
   });
 
+  const handleEdit = (log: TimeLog) => {
+    setEditingLog(log);
+    setDialogOpen(true);
+  };
+
+  const handleSave = async (timeLogId: string, startAt: string, endAt: string | null) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) throw new Error('Not authenticated');
+
+    const response = await fetch('/api/time-logs', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        time_log_id: timeLogId,
+        start_at: startAt,
+        end_at: endAt,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update time log');
+    }
+
+    // Invalidate queries to refresh data
+    queryClient.invalidateQueries({ queryKey: ['time-logs', taskId] });
+    queryClient.invalidateQueries({ queryKey: ['active-time-log', taskId] });
+
+    toast({
+      title: 'Time log updated',
+      description: 'The time log has been successfully updated.',
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -181,52 +227,67 @@ function TimeLogHistory({ taskId }: { taskId: string }) {
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Start Time</TableHead>
-          <TableHead>End Time</TableHead>
-          <TableHead>Duration</TableHead>
-          <TableHead className="text-center">Status</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {timeLogs.map((log) => {
-          // Calculate duration in code from start_at and end_at
-          let calculatedDuration = log.duration;
-          if (log.start_at && log.end_at) {
-            const startTime = new Date(log.start_at).getTime();
-            const endTime = new Date(log.end_at).getTime();
-            calculatedDuration = Math.floor((endTime - startTime) / 1000);
-          } else if (log.start_at && !log.end_at) {
-            // Still running - calculate from start to now
-            const startTime = new Date(log.start_at).getTime();
-            const now = new Date().getTime();
-            calculatedDuration = Math.floor((now - startTime) / 1000);
-          }
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Start Time</TableHead>
+            <TableHead>End Time</TableHead>
+            <TableHead>Duration</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {timeLogs.map((log) => {
+            // Calculate duration in code from start_at and end_at
+            let calculatedDuration = log.duration;
+            if (log.start_at && log.end_at) {
+              const startTime = new Date(log.start_at).getTime();
+              const endTime = new Date(log.end_at).getTime();
+              calculatedDuration = Math.floor((endTime - startTime) / 1000);
+            } else if (log.start_at && !log.end_at) {
+              // Still running - calculate from start to now
+              const startTime = new Date(log.start_at).getTime();
+              const now = new Date().getTime();
+              calculatedDuration = Math.floor((now - startTime) / 1000);
+            }
 
-          return (
-            <TableRow key={log.id}>
-              <TableCell>{formatDateTime(log.start_at)}</TableCell>
-              <TableCell>{log.end_at ? formatDateTime(log.end_at) : '-'}</TableCell>
-              <TableCell className="font-mono font-semibold">
-                {formatDuration(calculatedDuration)}
-              </TableCell>
-              <TableCell className="text-center">
-                {!log.end_at && (
-                  <Badge
-                    variant="outline"
-                    className="border-green-200 bg-green-500/10 text-green-700 dark:border-green-800 dark:text-green-400"
-                  >
-                    Active
-                  </Badge>
-                )}
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+            return (
+              <TableRow key={log.id}>
+                <TableCell>{formatDateTime(log.start_at)}</TableCell>
+                <TableCell>{log.end_at ? formatDateTime(log.end_at) : '-'}</TableCell>
+                <TableCell className="font-mono font-semibold">
+                  {formatDuration(calculatedDuration)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {!log.end_at && (
+                    <Badge
+                      variant="outline"
+                      className="border-green-200 bg-green-500/10 text-green-700 dark:border-green-800 dark:text-green-400"
+                    >
+                      Active
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(log)} className="h-8">
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+
+      <EditTimeLogDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        timeLog={editingLog}
+        onSave={handleSave}
+      />
+    </>
   );
 }
 
